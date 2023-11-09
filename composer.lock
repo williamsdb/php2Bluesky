@@ -1,0 +1,66 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "0351ec85bc496d32054b601d366d7fc1",
+    "packages": [
+        {
+            "name": "cjrasmussen/bluesky-api",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cjrasmussen/BlueskyApi.git",
+                "reference": "dd73faf434614280dd24668bc884d842c9f15419"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cjrasmussen/BlueskyApi/zipball/dd73faf434614280dd24668bc884d842c9f15419",
+                "reference": "dd73faf434614280dd24668bc884d842c9f15419",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "cjrasmussen\\BlueskyApi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Clark Rasmussen",
+                    "homepage": "https://cjr.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple helper for interacting with the Bluesky API/AT protocol",
+            "homepage": "https://cjr.dev",
+            "keywords": [
+                "bluesky"
+            ],
+            "support": {
+                "issues": "https://github.com/cjrasmussen/BlueskyApi/issues",
+                "source": "https://github.com/cjrasmussen/BlueskyApi"
+            },
+            "time": "2023-07-26T21:06:45+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
+}

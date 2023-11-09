@@ -2,14 +2,13 @@
 
 use cjrasmussen\BlueskyApi\BlueskyApi;
 
-
-function bluesky_connect($handle, $password)
-  {
+    function bluesky_connect($handle, $password)
+    {
 
     $connection = new BlueskyApi($handle, $password);
     return $connection;
 
-  }
+    }
 
     function upload_media_to_bluesky($connection, $s3name)
 	{
@@ -43,7 +42,7 @@ function bluesky_connect($handle, $password)
 	{
 
     // parse for URLS
-    $urls = $this->mark_urls($text);
+    $urls = mark_urls($text);
     $links = array();
     if (!empty($urls)){
       foreach ($urls as $url) {
@@ -109,7 +108,7 @@ function bluesky_connect($handle, $password)
  
   }
 
-function mark_urls($text) {
+    function mark_urls($text) {
 
     $regex = '/(https?:\/\/[^\s]+)/';
     preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);

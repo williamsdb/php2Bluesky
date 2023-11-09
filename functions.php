@@ -2,19 +2,8 @@
 
 use cjrasmussen\BlueskyApi\BlueskyApi;
 
-class Bluesky_model extends CI_Model {
 
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->load->helper('authit');
-    //$this->load->model('Networks_model', '', TRUE);
-    $this->load->model('Audit_model', '', TRUE);
-
-  }
-
-  public function bluesky_connect($handle, $password)
+function bluesky_connect($handle, $password)
   {
 
     $connection = new BlueskyApi($handle, $password);
@@ -22,32 +11,14 @@ class Bluesky_model extends CI_Model {
 
   }
 
-	public function upload_media_to_bluesky($connection, $s3name, $s3=TRUE)
+    function upload_media_to_bluesky($connection, $s3name)
 	{
 
-		// have we been passed a file?
-		if (empty($s3name)) return;
-
-    // audit the request
-    $this->Audit_model->audit_controller('Bluesky_model', 'upload_media_to_bluesky', 'Starting media upload to Bluesky', '');
+	// have we been passed a file?
+	if (empty($s3name)) return;
     
-    // upload the file
-    if ($s3){
-      // get the user that owns the file
-      $this->load->model('User_model');
-      $user = $this->User_model->get_user_from_s3name($s3name);
-
-      $body = file_get_contents($this->config->item('AWS_PUBLIC_URL').".".$user[0]['user_id']."/".$s3name);
-      $headers = get_headers($this->config->item('AWS_PUBLIC_URL').".".$user[0]['user_id']."/".$s3name, 1); 
-
-      if (isset($headers['Content-Type'])) {
-          $mime = $headers['Content-Type'];
-      } else {
-          $mime ='image/jpeg';
-      }
-  }else{
-      $body = file_get_contents($s3name);
-      if(filter_var($s3name, FILTER_VALIDATE_URL)){
+    $body = file_get_contents($s3name);
+    if(filter_var($s3name, FILTER_VALIDATE_URL)){
 
         $headers = get_headers($s3name, 1); 
 
@@ -59,10 +30,8 @@ class Bluesky_model extends CI_Model {
      }else{
       $mime = mime_content_type($s3name);
      }
-    }
 
     $response = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
-    $this->Audit_model->audit_controller('Bluesky_model', 'upload_media_to_bluesky', 'Ending media upload to Bluesky', print_r($response, TRUE));
 
     $image = $response->blob;
 
@@ -70,7 +39,7 @@ class Bluesky_model extends CI_Model {
 
   }
 
-	public function post_to_bluesky($connection, $text, $media='', $link='')
+	function post_to_bluesky($connection, $text, $media='', $link='')
 	{
 
     // parse for URLS
@@ -117,7 +86,7 @@ class Bluesky_model extends CI_Model {
 
     // add any link
     if (!empty($link)){
-      $embed = $this->fetch_link_card($connection, $link);
+      $embed = fetch_link_card($connection, $link);
     }
 
     // build the final arguments
@@ -135,15 +104,12 @@ class Bluesky_model extends CI_Model {
     if (!empty($embed)) $args['record'] = array_merge($args['record'], $embed);
     if (!empty($links)) $args['record'] = array_merge($args['record'], $links);
 
-    // audit the request
-    $this->Audit_model->audit_controller('Bluesky_model', 'post_to_bluesky', 'Post', print_r($args, TRUE));
-
     // send to bluesky
     return $connection->request('POST', 'com.atproto.repo.createRecord', $args);
  
   }
 
-  public function mark_urls($text) {
+function mark_urls($text) {
 
     $regex = '/(https?:\/\/[^\s]+)/';
     preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
@@ -165,7 +131,7 @@ class Bluesky_model extends CI_Model {
     return $urlData;
   }
 
-  public function fetch_link_card($connection, $url) {
+function fetch_link_card($connection, $url) {
 
     // The required fields for every embed card
     $card = [
@@ -209,7 +175,7 @@ class Bluesky_model extends CI_Model {
             $img_url = $url . $img_url;
         }
         
-        $image = $this->upload_media_to_bluesky($connection, $img_url, $s3=FALSE);
+        $image = upload_media_to_bluesky($connection, $img_url, $s3=FALSE);
     }
 
     $embed = '';
@@ -228,7 +194,3 @@ class Bluesky_model extends CI_Model {
     return $embed;
     
   }
-
-}
-/* End of file Bluesky_model.php */
-/* Location: ./application/models/Bluesky_model.php */

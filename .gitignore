@@ -1,3 +1,4 @@
+composer.*
 vendor/
 bin/
 .DS_Store

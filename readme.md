@@ -46,7 +46,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-I wanted a way to output all the posts in my WordPress blog to a nicely formatted PDF file but none of the existing WordPress plugins worked so I decided to build my own script.
+With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky which somewhat ironically has its roots in Twitter where it was started as an internal project. Bluesky is still in beta and is invite-only. I worry about Bluesky's long-term given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today which is posting to Bluesky via the API.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -55,6 +55,7 @@ I wanted a way to output all the posts in my WordPress blog to a nicely formatte
 ### Built With
 
 * [PHP](https://php.net)
+* [BlueskyApi by Clark Rasmussen] (https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -63,25 +64,31 @@ I wanted a way to output all the posts in my WordPress blog to a nicely formatte
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Running the script is very straight forward:
+Running the script is very straightforward:
 
-1. download the code
-3. run php index.php
+1. download the code/clone the repository
+2. install [composer] (https://getcomposer.org/)
+3. add the BlueskyAPI 
 
-You can read more about how this all works in [this blog post](https://www.spokenlikeageek.com/2023/08/02/exporting-all-wordpress-posts-to-pdf/).
+> composer.phar require cjrasmussen/bluesky-api
+
+Now you can inspect and update index.php to get some examples. 
+
+You can read more about how this all works in [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/).
 
 ### Prerequisites
 
 Requirements are very simple, it requires the following:
 
-1. PHP (I tested on v7.4.33)
-2. a WordPress blog and your WordPress Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/08/02/exporting-all-wordpress-posts-to-pdf/) for details of how to do that).
+1. PHP (I tested on v8.1.13)
+2. Clark Rasmussen's [BlueskyApi] (https://github.com/cjrasmussen/BlueskyApi)
+2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that).
 
 ### Installation
 
 1. Clone the repo:
    ```sh
-   git clone https://github.com/williamsdb/wordpress-to-pdf.git
+   git clone https://github.com/williamsdb/php2Bluesky.git
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -91,16 +98,7 @@ Requirements are very simple, it requires the following:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-1. Run the code:
-```php index.php "URL of your site" "name of the WordPress user" "your Application Password" "local folder where you would like the output placed"``` 
-
-You will see output similar to the following:
-
-![](https://www.spokenlikeageek.com/wp-content/uploads/2023/07/conf.d-%E2%80%94-zsh-%E2%80%94-127%C3%9729-2023-07-27-19-11-36-1.png?w=1240&ssl=1)
-
-The last step, “Writing output file” takes quite a while so don’t worry if it doesn’t seem to be responding.
-
-_For more information, please refer to the [this blog post](https://www.spokenlikeageek.com/2023/08/06/creating-a-word-cloud-from-your-day-one-entries/)_
+_For more information, please refer to the [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -109,10 +107,9 @@ _For more information, please refer to the [this blog post](https://www.spokenli
 <!-- ROADMAP -->
 ## Known Issues
 
-- only the featured image is supported, any in the body of the post will be silently dropped
-- only simple text formatting is supported (bold, italics and plain text) everything else will look strange
+- none
 
-See the [open issues](https://github.com/williamsdb/wordpress-to-pdf/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/williamsdb/php2Bluesky/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -150,7 +147,7 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 
 Your Name - [@spokenlikeageek](https://twitter.com/spokenlikeageek) - [Contact](https://www.spokenlikeageek.com/contact/)
 
-Project Link: [https://github.com/williamsdb/wordpress-to-pdf](https://github.com/williamsdb/wordpress-to-pdf)
+Project Link: [https://spokenlikeageek.com] (https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -159,8 +156,7 @@ Project Link: [https://github.com/williamsdb/wordpress-to-pdf](https://github.co
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [WordPress API](https://developer.wordpress.org/rest-api/)
-* [FPDF](http://www.fpdf.org/)
+* [BlueskyApi] (https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

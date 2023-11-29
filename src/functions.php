@@ -142,11 +142,13 @@
         
         foreach ($matches[1] as $match) {
             $did = get_did_from_handle($connection, substr($match[0], 1));
-            $mentionsData[] = [
-                "start" => $match[1],
-                "end" => $match[1] + strlen($match[0]),
-                "did" => $did->did,
-            ];
+            if (!empty($did->did)){
+                $mentionsData[] = [
+                    "start" => $match[1],
+                    "end" => $match[1] + strlen($match[0]),
+                    "did" => $did->did,
+                ];    
+            }
         }
         return $mentionsData;
     }

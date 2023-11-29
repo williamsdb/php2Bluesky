@@ -1,4 +1,5 @@
 composer.*
 vendor/
 bin/
+src/test.php
 .DS_Store

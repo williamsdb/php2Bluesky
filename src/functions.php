@@ -258,7 +258,7 @@
                 $img_url = $url . $img_url;
             }
             
-            $image = upload_media_to_bluesky($connection, $img_url, $s3=FALSE);
+            $image = upload_media_to_bluesky($connection, $img_url);
         }
 
         $embed = '';

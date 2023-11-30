@@ -7,6 +7,7 @@
     $password = '<your API password>';
     $filename = '<local or remote path to image>';
     $link = '<url of page for the link card>';
+    $fileUploadDir = "/tmp"; // location for image temporary files with no trailing slash
     $text = 'Hello World! https://spokenlikeageek.com';
     
     // connect to Bluesky API
@@ -17,7 +18,7 @@
     print_r($response);
 
     // send an image with text and a link
-    $image = upload_media_to_bluesky($connection, $filename);
+    $image = upload_media_to_bluesky($connection, $filename, $fileUploadDir);
     $response = post_to_bluesky($connection, $text, $image);
     print_r($response);
 

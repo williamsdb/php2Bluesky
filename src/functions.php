@@ -2,6 +2,8 @@
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
+    const maxUploadSize = 1000000; //don't change this unless Bluesky change the limit
+
     function bluesky_connect($handle, $password)
     {
 
@@ -10,13 +12,39 @@
 
     }
 
-    function upload_media_to_bluesky($connection, $filename)
+    function upload_media_to_bluesky($connection, $filename, $fileUploadDir = '/tmp')
 	{
 
         // have we been passed a file?
         if (empty($filename)) return;
         
+        // get the mime type, size and basename of the file
         $body = file_get_contents($filename);
+        $basename = getFileName($filename);
+        $size = strlen($body);
+
+        // does the file size need reducing?
+        if ($size > maxUploadSize){
+            $newImage = imagecreatefromstring($body);
+            // downsample the image until it is less than maxImageSize (if possible!)
+            for ($i = 9; $i >= 1; $i--) {
+
+                imagejpeg($newImage, $fileUploadDir.'/'.$basename,$i * 10);
+                $size = strlen(file_get_contents($fileUploadDir.'/'.$basename));
+
+                if ($size < maxUploadSize) {
+                    break;
+                }else{
+                    unlink($fileUploadDir.'/'.$basename);
+                }
+
+            }
+
+            $body = file_get_contents($fileUploadDir.'/'.$basename);
+            unlink($fileUploadDir.'/'.$basename);
+        }
+
+        // get the file mime type
         if(filter_var($filename, FILTER_VALIDATE_URL)){
             $headers = get_headers($filename, 1); 
 
@@ -248,6 +276,16 @@
 
         return $embed;
     
+    }
+
+    function getFileName($path) {
+        // If the path is a URL, use basename to get the filename
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return basename(parse_url($path, PHP_URL_PATH));
+        } else {
+            // If the path is a local path, use basename to get the filename
+            return basename($path);
+        }
     }
 
 ?>

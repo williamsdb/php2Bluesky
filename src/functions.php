@@ -2,7 +2,9 @@
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
-    const maxUploadSize = 1000000; //don't change this unless Bluesky change the limit
+    //don't change these unless Bluesky change the limits
+    const maxUploadSize = 1000000;
+    const maxImageUpload = 4; 
 
     function bluesky_connect($handle, $password)
     {
@@ -119,13 +121,13 @@
             $facets,
         ];
 
-        // add any media - will accept up to four images in an array or a single image as a string
+        // add any media - will accept multiple images in an array or a single image as a string
         $embed = '';
         if (!empty($media)){
             if (is_array($media)){
                 $k = 0;
                 $mediaArray = array();
-                while ($k < count($media) && $k < 4){
+                while ($k < count($media) && $k < maxImageUpload){
                     array_push($mediaArray, [
                         'alt' => '',
                         'image' => $media[$k],

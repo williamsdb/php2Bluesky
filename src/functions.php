@@ -119,20 +119,34 @@
             $facets,
         ];
 
-        // add any media
+        // add any media - will accept up to four images in an array or a single image as a string
         $embed = '';
         if (!empty($media)){
-        $embed = [
-            'embed' => [
-            '$type' => 'app.bsky.embed.images',
-            'images' => [
-                [
-                'alt' => '',
-                'image' => $media,
+            if (is_array($media)){
+                $k = 0;
+                $mediaArray = array();
+                while ($k < count($media) && $k < 4){
+                    array_push($mediaArray, [
+                        'alt' => '',
+                        'image' => $media[$k],
+                        ]);
+                    $k++;    
+                }
+            }else{
+                $mediaArray = [
+                    [
+                    'alt' => '',
+                    'image' => $media,
+                    ]
+                ];
+            }
+        
+            $embed = [
+                'embed' => [
+                    '$type' => 'app.bsky.embed.images',
+                    'images' => $mediaArray,
                 ],
-            ],
-            ],
-        ];
+            ];
         }
 
         // add any link cards

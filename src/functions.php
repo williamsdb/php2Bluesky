@@ -175,6 +175,26 @@
  
     }
 
+	function get_from_bluesky($connection, $link)
+	{
+        // Extract the account name
+        preg_match('/\/([^\/]+)\/([^\/]+)\/([^\/]+)/', $link, $matches);
+        $account = isset($matches[3]) ? $matches[3] : '';
+        
+        // Extract the post id
+        preg_match_all('/\/([^\/]+)/', $link, $matches);
+        $postId= isset($matches[1][4]) ? $matches[1][4] : '';
+
+        $args = [
+            'repo' => $account,
+            'collection' => 'app.bsky.feed.post',
+            'rkey' => $postId
+        ];
+    
+        // retrieve the post from Bluesky using the extracted account name and post id
+        return $connection->request('GET', 'com.atproto.repo.getRecord', $args);
+    }
+
     function mark_mentions($connection, $text) {
 
         $spans = [];

@@ -9,7 +9,8 @@
     function bluesky_connect($handle, $password)
     {
 
-        $connection = new BlueskyApi($handle, $password);
+        $connection = new BlueskyApi();
+        $connection->auth($handle, $password);
         return $connection;
 
     }

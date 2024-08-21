@@ -55,7 +55,7 @@ With all the uncertainty surrounding the future of X (née Twitter), I decided t
 ### Built With
 
 * [PHP](https://php.net)
-* [BlueskyApi by Clark Rasmussen] (https://github.com/cjrasmussen/BlueskyApi)
+* [BlueskyApi by Clark Rasmussen](https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -81,7 +81,7 @@ You can read more about how this all works in [this blog post](https://www.spoke
 Requirements are very simple, it requires the following:
 
 1. PHP (I tested on v8.1.13)
-2. Clark Rasmussen's [BlueskyApi] (https://github.com/cjrasmussen/BlueskyApi) (required v2 or above) 
+2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
 2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that).
 
 ### Installation
@@ -147,7 +147,7 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 
 Your Name - [@spokenlikeageek](https://twitter.com/spokenlikeageek) - [Contact](https://www.spokenlikeageek.com/contact/)
 
-Project Link: [https://spokenlikeageek.com] (https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)
+Project Link: [https://spokenlikeageek.com](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -156,7 +156,7 @@ Project Link: [https://spokenlikeageek.com] (https://www.spokenlikeageek.com/202
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [BlueskyApi] (https://github.com/cjrasmussen/BlueskyApi)
+* [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

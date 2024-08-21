@@ -67,7 +67,7 @@ With all the uncertainty surrounding the future of X (née Twitter), I decided t
 Running the script is very straightforward:
 
 1. download the code/clone the repository
-2. install [composer] (https://getcomposer.org/)
+2. install [composer](https://getcomposer.org/)
 3. add the BlueskyAPI 
 
 > composer.phar require cjrasmussen/bluesky-api

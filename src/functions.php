@@ -50,13 +50,13 @@
         // get the file mime type
         if(filter_var($filename, FILTER_VALIDATE_URL)){
             $headers = get_headers($filename, 1); 
-
             if (isset($headers['Content-Type'])) {
                 $mime = $headers['Content-Type'];
+            } elseif (isset($headers['content-type'])) {
+                $mime = $headers['content-type'];
             } else {
                 // shouldn't have got here so issue that needs to be handled!
             }
-        }else{
             $mime = mime_content_type($filename);
         }
 

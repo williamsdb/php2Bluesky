@@ -80,7 +80,7 @@ You can read more about how this all works in [this blog post](https://www.spoke
 
 Requirements are very simple, it requires the following:
 
-1. PHP (I tested on v8.1.13)
+1. PHP (I tested on v8.1.13) - requires php-dom and php-gd
 2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
 2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that).
 

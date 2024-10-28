@@ -57,6 +57,7 @@
             } else {
                 // shouldn't have got here so issue that needs to be handled!
             }
+        }else{
             $mime = mime_content_type($filename);
         }
 

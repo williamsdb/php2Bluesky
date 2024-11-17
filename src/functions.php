@@ -2,7 +2,7 @@
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
-    //don't change these unless Bluesky change the limits
+    //don't change these unless Bluesky changes the limits
     const maxUploadSize = 1000000;
     const maxImageUpload = 4; 
 
@@ -72,7 +72,7 @@
 	function post_to_bluesky($connection, $text, $media='', $link='')
 	{
 
-        // parse for URLS
+        // parse for URLs
         $urls = mark_urls($text);
         $links = array();
         if (!empty($urls)){
@@ -116,8 +116,30 @@
             }
         }
 
+        // parse for hashtags
+        $hashtagData = mark_hashtags($text);
+        $hashtags = array();
+        if (!empty($hashtagData)){
+            foreach ($hashtagData as $hashtag) {
+                $a = [
+                "index" => [
+                    "byteStart" => $hashtag['start'],
+                    "byteEnd" => $hashtag['end'],
+                ],
+                "features" => [
+                    [
+                        '$type' => "app.bsky.richtext.facet#tag",
+                        'tag' => $hashtag['hashtag'], 
+                    ],
+                ],
+                ];
+
+                $hashtags[] = $a;
+            }
+        }
+
         // now form the arguments for links and mentions
-        $facets = array_merge($mentions, $links);
+        $facets = array_merge($hashtags, $mentions, $links);
         $facets = [
             'facets' =>
             $facets,
@@ -250,6 +272,49 @@
         }
 
         return $urlData;
+    }
+
+    function mark_hashtags($text) {
+
+        // Regex to find and remove URLs
+        $urlRegex = '/https?:\/\/[^\s]+/';
+        preg_match_all($urlRegex, $text, $urlMatches, PREG_OFFSET_CAPTURE);
+
+        // Replace URLs in the text with placeholders of the same length
+        $cleanText = $text;
+        foreach ($urlMatches[0] as $urlMatch) {
+            $url = $urlMatch[0];
+            $start = $urlMatch[1];
+            $urlLength = strlen($url);
+    
+            // Replace URL with spaces to maintain position alignment
+            $cleanText = substr_replace($cleanText, str_repeat(' ', $urlLength), $start, $urlLength);
+        }
+
+        // Regex to find hashtags
+        $hashtagRegex = '/#(\w+)/';
+        preg_match_all($hashtagRegex, $cleanText, $matches, PREG_OFFSET_CAPTURE);
+
+        $hashtagData = array();
+
+        foreach ($matches[0] as $match) {
+            $hashtag = clean_hashtag($match[0]);
+            $start = $match[1];
+            $end = $start + strlen($hashtag);
+    
+            $hashtagData[] = array(
+                'start' => $start,
+                'end' => $end,
+                'hashtag' => substr($hashtag,1)
+            );
+        }
+    
+        return $hashtagData;
+    }
+
+    function clean_hashtag($tag) {
+        // Trim whitespace and remove trailing punctuation
+        return preg_replace('/\p{P}+$/u', '', trim($tag));
     }
 
     function fetch_link_card($connection, $url) {

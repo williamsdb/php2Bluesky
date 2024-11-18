@@ -69,7 +69,7 @@
 
     }
 
-	function post_to_bluesky($connection, $text, $media='', $link='')
+	function post_to_bluesky($connection, $text, $media='', $link='', $alt='')
 	{
 
         // parse for URLs
@@ -152,8 +152,9 @@
                 $k = 0;
                 $mediaArray = array();
                 while ($k < count($media) && $k < maxImageUpload){
+                    $altText = isset($alt[$k]) ? $alt[$k] : '';
                     array_push($mediaArray, [
-                        'alt' => '',
+                        'alt' => $altText,
                         'image' => $media[$k],
                         ]);
                     $k++;    
@@ -161,7 +162,7 @@
             }else{
                 $mediaArray = [
                     [
-                    'alt' => '',
+                    'alt' => $alt,
                     'image' => $media,
                     ]
                 ];
@@ -174,6 +175,7 @@
                 ],
             ];
         }
+print_r($embed);
 
         // add any link cards
         if (!empty($link)){

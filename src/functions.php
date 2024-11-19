@@ -175,7 +175,6 @@
                 ],
             ];
         }
-print_r($embed);
 
         // add any link cards
         if (!empty($link)){

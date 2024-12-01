@@ -254,8 +254,7 @@
     }
 
     function mark_urls($text) {
-
-        $regex = '/(https?:\/\/[^\s]+)/';
+        $regex = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<!\.)/i';
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $urlData = array();

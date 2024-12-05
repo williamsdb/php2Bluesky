@@ -48,6 +48,8 @@
 
 With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky which somewhat ironically has its roots in Twitter where it was started as an internal project. Bluesky is still in beta and is invite-only. I worry about Bluesky's long-term given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today which is posting to Bluesky via the API.
 
+<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y0POEES');kofiwidget2.draw();</script> 
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -98,6 +100,64 @@ Requirements are very simple, it requires the following:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+Here's a few examples to get you started. 
+
+*  Setup and connect to Bluesky:
+
+```
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/functions.php';
+
+$handle = 'yourhandle.bsky.social';
+$password = 'abcd-efgh-ijkl-mnop';
+    
+// connect to Bluesky API
+$connection = bluesky_connect($handle, $password);
+```
+
+* Sending text with tags
+
+```
+$text = "This is some text with a #hashtag.";
+
+$response = post_to_bluesky($connection, $text);
+print_r($response);
+```
+
+* Uploading a post with a single image and embedded url
+
+```
+$filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
+$text = 'Screenshot of Bluesky';
+$alt = 'This is the screenshot that Wikipedia uses for their https://en.wikipedia.org/wiki/Bluesky entry.';
+
+$image = upload_media_to_bluesky($connection, $filename1);
+
+$response = post_to_bluesky($connection, $text, $image, '', $alt);
+print_r($response);
+```
+
+* Uploading a post with multiple images (both local and remote)
+
+````
+$filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
+$filename2 = '/Users/neilthompson/Development/php2Bluesky/Screenshot1.png';
+$filename3 = 'https://www.spokenlikeageek.com/wp-content/uploads/2024/11/2024-11-18-19-28-59.png';
+$filename4 = '/Users/neilthompson/Development/php2Bluesky/Screenshot2.png';
+$text = 'An example of four images taken both from a local machine and remote locations with some alt tags';
+    
+// send multiple images with text
+$image1 = upload_media_to_bluesky($connection, $filename1);
+$image2 = upload_media_to_bluesky($connection, $filename2);
+$image3 = upload_media_to_bluesky($connection, $filename3);
+$image4 = upload_media_to_bluesky($connection, $filename4);
+$imageArray = array($image1, $image2, $image3, $image4); 
+$alt = array('this has an alt', 'so does this');
+    
+$response = post_to_bluesky($connection, $text, $imageArray, '', $alt);
+print_r($response);
+```` 
+
 _For more information, please refer to the [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -107,8 +167,6 @@ _For more information, please refer to the [this blog post](https://www.spokenli
 <!-- ROADMAP -->
 ## Known Issues
 
-- none
-
 See the [open issues](https://github.com/williamsdb/php2Bluesky/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -117,6 +175,15 @@ See the [open issues](https://github.com/williamsdb/php2Bluesky/issues) for a fu
 
 <!-- CONTRIBUTING -->
 ## Contributing
+
+Thanks to the follow who have provided techincal and/or financial support for the project:
+
+* [Jan Strohschein](https://bsky.app/profile/hayglow.bsky.social)
+* [Ludwig Noujarret](https://bsky.app/profile/ludwig.noujarret.com)
+* [Paul Lee](https://bsky.app/profile/drpaullee.bsky.social)
+* [AJ](https://bsky.app/profile/asjmcguire.bsky.social)
+* [https://bsky.app/profile/bobafettfanclub.com](https://bsky.app/profile/bobafettfanclub.com)
+* [Doug "Bear" Hazard](https://bsky.app/profile/bearlydoug.com)
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -145,12 +212,17 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@spokenlikeageek](https://twitter.com/spokenlikeageek) - [Contact](https://www.spokenlikeageek.com/contact/)
+Bluesky - [@spokenlikeageek.com](https://bsky.app/profile/spokenlikeageek.com)
 
-Project Link: [https://spokenlikeageek.com](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)
+Mastodon - [@spokenlikeageek](https://techhub.social/@spokenlikeageek)
+
+X - [@spokenlikeageek](https://x.com/spokenlikeageek) 
+
+Website - [https://spokenlikeageek.com](https://www.spokenlikeageek.com/tag/bluesky/)
+
+Project link - [Github](https://github.com/williamsdb/php2Bluesky)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ACKNOWLEDGMENTS -->

@@ -3,6 +3,7 @@
     require __DIR__ . '/vendor/autoload.php';
     require __DIR__ . '/functions.php';
 
+    // change the follow to your details without the <>
     $handle = '<your Bluesky handle>';
     $password = '<your API password>';
     $filename = '<local or remote path to image>';

@@ -2,9 +2,13 @@
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
-    //don't change these unless Bluesky changes the limits
+    // don't change these unless Bluesky changes the limits
     const maxUploadSize = 1000000;
     const maxImageUpload = 4; 
+
+    // set error level
+    error_reporting(E_NOTICE);
+    ini_set('display_errors', 0);
 
     function bluesky_connect($handle, $password)
     {
@@ -178,7 +182,7 @@
 
         // add any link cards
         if (!empty($link)){
-            $embed = fetch_link_card($connection, $link);
+            $embed = fetch_link_card($connection, $link, $media);
         }
 
         // build the final arguments
@@ -198,6 +202,21 @@
         // send to bluesky
         return $connection->request('POST', 'com.atproto.repo.createRecord', $args);
  
+    }
+
+    // take a response from post_to_bluesky and return a permalink
+    function permalink_from_response($response, $handle){
+
+        // Extract the post id
+        preg_match('/\/([^\/]+)$/', $response->uri, $matches);
+
+        // Check if a match was found and return it
+        if (!empty($matches[1])) {
+            return 'https://bsky.app/profile/'.$handle.'/post/'.$matches[1];
+        } else {
+            echo "No post id found.";
+        }
+
     }
 
 	function get_from_bluesky($connection, $link)
@@ -317,53 +336,61 @@
         return preg_replace('/\p{P}+$/u', '', trim($tag));
     }
 
-    function fetch_link_card($connection, $url) {
-
+    function fetch_link_card($connection, $url, $media = '') {
+        
         // The required fields for every embed card
         $card = [
             "uri" => $url,
             "title" => "",
             "description" => "",
+            "imageurlff" => $media,
         ];
-
+    
         // Create a new DOMDocument
         $doc = new DOMDocument();
-
+    
         // Suppress errors for invalid HTML, if needed
         libxml_use_internal_errors(true);
-
+    
         // Load the HTML from the URL
-        $doc->loadHTMLFile($url);
-
+        if (!$doc->loadHTMLFile($url)){
+            die('Error loading url '.$url);
+        }
+    
         // Restore error handling
         libxml_use_internal_errors(false);
-
+    
         // Create a new DOMXPath object for querying the document
         $xpath = new DOMXPath($doc);
-
+    
         // Query for "og:title" and "og:description" meta tags
         $title_tag = $xpath->query('//meta[@property="og:title"]/@content');
         if ($title_tag->length > 0) {
             $card["title"] = $title_tag[0]->nodeValue;
         }
-
+    
         $description_tag = $xpath->query('//meta[@property="og:description"]/@content');
         if ($description_tag->length > 0) {
             $card["description"] = $description_tag[0]->nodeValue;
         }
-
-        // If there is an "og:image" meta tag, fetch and upload that image
-        $image_tag = $xpath->query('//meta[@property="og:image"]/@content');
-        if ($image_tag->length > 0) {
-            $img_url = $image_tag[0]->nodeValue;
-            // Naively turn a "relative" URL (just a path) into a full URL, if needed
-            if (!parse_url($img_url, PHP_URL_SCHEME)) {
-                $img_url = $url . $img_url;
+    
+        if($card["imageurlff"] == "") {
+            // If there is an "og:image" meta tag, fetch and upload that image
+            $image_tag = $xpath->query('//meta[@property="og:image"]/@content');
+            if ($image_tag->length > 0) {
+                $img_url = $image_tag[0]->nodeValue;
+                // Naively turn a "relative" URL (just a path) into a full URL, if needed
+                if (!parse_url($img_url, PHP_URL_SCHEME)) {
+                    $img_url = $url . $img_url;
+                }
+                $image = upload_media_to_bluesky($connection, $img_url);
+            }else{
+                die('No suitable image found for link card');
             }
-            
-            $image = upload_media_to_bluesky($connection, $img_url);
+        } else {
+            $image = upload_media_to_bluesky($connection, $card["imageurlff"]);
         }
-
+    
         $embed = '';
         $embed = [
         'embed' => [
@@ -376,11 +403,9 @@
             ],
         ],
         ];
-
         return $embed;
-    
     }
-
+    
     function getFileName($path) {
         // If the path is a URL, use basename to get the filename
         if (filter_var($path, FILTER_VALIDATE_URL)) {

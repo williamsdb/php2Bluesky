@@ -48,7 +48,7 @@
 
 With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky which somewhat ironically has its roots in Twitter where it was started as an internal project. Bluesky is still in beta and is invite-only. I worry about Bluesky's long-term given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today which is posting to Bluesky via the API.
 
-<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y0POEES');kofiwidget2.draw();</script> 
+<a href='https://ko-fi.com/Y8Y0POEES' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

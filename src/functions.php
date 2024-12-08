@@ -391,7 +391,11 @@
                 if (strtoupper(linkCardFallback) == 'RANDOM'){
                     $image = upload_media_to_bluesky($connection, 'https://picsum.photos/1024/536');
                 }elseif (strtoupper(linkCardFallback) == 'BLANK'){
-                    $image = upload_media_to_bluesky($connection, './blank.png');
+                    if (file_exists('./blank.png')){
+                        $image = upload_media_to_bluesky($connection, './blank.png');
+                    }else{
+                        die('BLANK specified for link card fallback but blank.png is missing');
+                    }
                 }else{
                     die('No suitable image found for link card');
                 }

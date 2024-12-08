@@ -4,7 +4,10 @@
 
     // don't change these unless Bluesky changes the limits
     const maxUploadSize = 1000000;
-    const maxImageUpload = 4; 
+    const maxImageUpload = 4;
+
+    // what happens when there is no link card image (RANDOM, BLANK or ERROR)
+    const linkCardFallback = 'BLANK';
 
     // set error level
     error_reporting(E_NOTICE);
@@ -311,7 +314,7 @@
         }
 
         // Regex to find hashtags
-        $hashtagRegex = '/#(\w+)/';
+        $hashtagRegex = '/#([\p{L}\p{N}]{1,})/';
         preg_match_all($hashtagRegex, $cleanText, $matches, PREG_OFFSET_CAPTURE);
 
         $hashtagData = array();
@@ -385,7 +388,13 @@
                 }
                 $image = upload_media_to_bluesky($connection, $img_url);
             }else{
-                die('No suitable image found for link card');
+                if (linkCardFallback == 'RANDOM'){
+                    $image = upload_media_to_bluesky($connection, 'https://picsum.photos/1024/536');
+                }elseif (linkCardFallback == 'BLANK'){
+                    $image = upload_media_to_bluesky($connection, './blank.png');
+                }else{
+                    die('No suitable image found for link card');
+                }
             }
         } else {
             $image = upload_media_to_bluesky($connection, $card["imageurlff"]);

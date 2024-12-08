@@ -76,7 +76,7 @@ Running the script is very straightforward:
 
 Now you can inspect and update index.php to get some examples. 
 
-You can read more about how this all works in [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/).
+If you are interested in what is happening under the hood then read [this series of blog posts](https://www.spokenlikeageek.com/tag/bluesky/).
 
 ### Prerequisites
 
@@ -158,8 +158,6 @@ $response = post_to_bluesky($connection, $text, $imageArray, '', $alt);
 print_r($response);
 ```` 
 
-_For more information, please refer to the [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/)_
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -233,19 +231,24 @@ Project link - [Github](https://github.com/williamsdb/php2Bluesky)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+[![](https://github.com/williamsdb/php2Bluesky/graphs/contributors)](https://img.shields.io/github/contributors/williamsdb/php2Bluesky.svg?style=for-the-badge)
 
+![](https://img.shields.io/github/contributors/williamsdb/php2Bluesky.svg?style=for-the-badge)
+![](https://img.shields.io/github/forks/williamsdb/php2Bluesky.svg?style=for-the-badge)
+![](https://img.shields.io/github/stars/williamsdb/php2Bluesky.svg?style=for-the-badge)
+![](https://img.shields.io/github/issues/williamsdb/php2Bluesky.svg?style=for-the-badge)
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/williamsdb/php2Bluesky.svg?style=for-the-badge
+[contributors-url]: https://github.com/williamsdb/php2Bluesky/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/williamsdb/php2Bluesky.svg?style=for-the-badge
+[forks-url]: https://github.com/williamsdb/php2Bluesky/network/members
+[stars-shield]: https://img.shields.io/github/stars/williamsdb/php2Bluesky.svg?style=for-the-badge
+[stars-url]: https://github.com/williamsdb/php2Bluesky/stargazers
+[issues-shield]: https://img.shields.io/github/issues/williamsdb/php2Bluesky.svg?style=for-the-badge
+[issues-url]: https://github.com/williamsdb/php2Bluesky/issues
+[license-shield]: https://img.shields.io/github/license/williamsdb/php2Bluesky.svg?style=for-the-badge
+[license-url]: https://github.com/williamsdb/php2Bluesky/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
 [product-screenshot]: images/screenshot.png

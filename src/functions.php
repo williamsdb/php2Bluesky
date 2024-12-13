@@ -420,8 +420,6 @@
                 }elseif (strtoupper(linkCardFallback) == 'BLANK'){
                     if (file_exists(__DIR__.'/blank.png')){
                         $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
-                    if (file_exists(__DIR__.'/blank.png')){
-                        $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
                     }else{
                         die('BLANK specified for link card fallback but blank.png is missing');
                     }

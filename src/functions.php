@@ -2,17 +2,32 @@
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
-    // don't change these unless Bluesky changes the limits
-    const maxUploadSize = 1000000;
-    const maxImageUpload = 4;
+    class RegexPatterns
+    {
+        public const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
+        public const URL_REGEX = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<![\.,:;!?])/i';
+        public const TAG_REGEX = '/(^|\s)[#＃]((?!\x{fe0f})[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*[^\d\s\p{P}\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]+[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*)?/u';
+    }
+
+    class BlueskyConsts
+    {
+        // don't change these unless Bluesky changes the limits
+        const MAX_UPLOAD_SIZE = 1000000;
+        const MAX_IMAGE_UPLOAD = 4;
+        const MAX_POST_SIZE = 300;
+    }
 
     // what happens when there is no link card image (RANDOM, BLANK or ERROR)
     const linkCardFallback = 'BLANK';
 
+    // what happens when text is > maxPostSize
+    const failOverMaxPostSize = FALSE;
+
     // set error level
     error_reporting(E_NOTICE);
     ini_set('display_errors', 0);
-
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
     function bluesky_connect($handle, $password)
     {
 
@@ -34,7 +49,7 @@
         $size = strlen($body);
 
         // does the file size need reducing?
-        if ($size > maxUploadSize){
+        if ($size > BlueskyConsts::MAX_UPLOAD_SIZE){
             $newImage = imagecreatefromstring($body);
             // downsample the image until it is less than maxImageSize (if possible!)
             for ($i = 9; $i >= 1; $i--) {
@@ -42,7 +57,7 @@
                 imagejpeg($newImage, $fileUploadDir.'/'.$basename,$i * 10);
                 $size = strlen(file_get_contents($fileUploadDir.'/'.$basename));
 
-                if ($size < maxUploadSize) {
+                if ($size < BlueskyConsts::MAX_UPLOAD_SIZE) {
                     break;
                 }else{
                     unlink($fileUploadDir.'/'.$basename);
@@ -78,6 +93,12 @@
 
 	function post_to_bluesky($connection, $text, $media='', $link='', $alt='')
 	{
+
+
+        // check for post > BlueskyConsts::MAX_POST_SIZE
+        if (over_max_post_size($text) && failOverMaxPostSize){
+            die('Provided text greater than '.BlueskyConsts::MAX_POST_SIZE);
+        }
 
         // parse for URLs
         $urls = mark_urls($text);
@@ -158,7 +179,7 @@
             if (is_array($media)){
                 $k = 0;
                 $mediaArray = array();
-                while ($k < count($media) && $k < maxImageUpload){
+                while ($k < count($media) && $k < BlueskyConsts::MAX_IMAGE_UPLOAD){
                     $altText = isset($alt[$k]) ? $alt[$k] : '';
                     array_push($mediaArray, [
                         'alt' => $altText,
@@ -245,15 +266,14 @@
     function mark_mentions($connection, $text) {
 
         $spans = [];
-        $mention_regex = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
-        $text_bytes = mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
-        preg_match_all($mention_regex, $text_bytes, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all(RegexPatterns::MENTION_REGEX, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $mentionsData = array();
         
         foreach ($matches[1] as $match) {
             $did = get_did_from_handle($connection, substr($match[0], 1));
             if (!empty($did->did)){
+
                 $mentionsData[] = [
                     "start" => $match[1],
                     "end" => $match[1] + strlen($match[0]),
@@ -276,8 +296,7 @@
     }
 
     function mark_urls($text) {
-        $regex = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<!\.)/i';
-        preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all(RegexPatterns::URL_REGEX, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $urlData = array();
 
@@ -297,11 +316,9 @@
     }
 
     function mark_hashtags($text) {
-
         // Regex to find and remove URLs
-        $urlRegex = '/https?:\/\/[^\s]+/';
-        preg_match_all($urlRegex, $text, $urlMatches, PREG_OFFSET_CAPTURE);
-
+        preg_match_all(RegexPatterns::URL_REGEX, $text, $urlMatches, PREG_OFFSET_CAPTURE);
+    
         // Replace URLs in the text with placeholders of the same length
         $cleanText = $text;
         foreach ($urlMatches[0] as $urlMatch) {
@@ -312,33 +329,43 @@
             // Replace URL with spaces to maintain position alignment
             $cleanText = substr_replace($cleanText, str_repeat(' ', $urlLength), $start, $urlLength);
         }
-
+    
         // Regex to find hashtags
-        $hashtagRegex = '/#([\p{L}\p{N}]{1,})/';
-        preg_match_all($hashtagRegex, $cleanText, $matches, PREG_OFFSET_CAPTURE);
-
+        preg_match_all(RegexPatterns::TAG_REGEX, $cleanText, $matches, PREG_OFFSET_CAPTURE);
+    
         $hashtagData = array();
-
+    
         foreach ($matches[0] as $match) {
-            $hashtag = clean_hashtag($match[0]);
+            $originalHashtag = $match[0]; // Capture the hashtag as it appears in the text
             $start = $match[1];
-            $end = $start + strlen($hashtag);
+    
+            // Exclude preceding space (if any) from the start
+            if ($originalHashtag[0] === ' ') {
+                $start += 1;
+                $originalHashtag = substr($originalHashtag, 1);
+            }
+    
+            // Clean the hashtag (removing trailing punctuation)
+            $cleanedHashtag = clean_hashtag($originalHashtag);
+    
+            // Calculate the correct end position after cleaning
+            $end = $start + strlen($cleanedHashtag);
     
             $hashtagData[] = array(
                 'start' => $start,
                 'end' => $end,
-                'hashtag' => substr($hashtag,1)
+                'hashtag' => substr($cleanedHashtag, 1) // Remove the '#' or '＃' prefix
             );
         }
     
         return $hashtagData;
     }
-
+    
     function clean_hashtag($tag) {
         // Trim whitespace and remove trailing punctuation
         return preg_replace('/\p{P}+$/u', '', trim($tag));
     }
-
+                
     function fetch_link_card($connection, $url, $media = '') {
         
         // The required fields for every embed card
@@ -393,6 +420,8 @@
                 }elseif (strtoupper(linkCardFallback) == 'BLANK'){
                     if (file_exists(__DIR__.'/blank.png')){
                         $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
+                    if (file_exists(__DIR__.'/blank.png')){
+                        $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
                     }else{
                         die('BLANK specified for link card fallback but blank.png is missing');
                     }
@@ -426,6 +455,14 @@
         } else {
             // If the path is a local path, use basename to get the filename
             return basename($path);
+        }
+    }
+
+    function over_max_post_size($text){
+        if (strlen($text)>300){
+            return TRUE;
+        }else{
+            return FALSE;
         }
     }
 

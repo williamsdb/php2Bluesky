@@ -377,6 +377,8 @@
         ];
     
         // Create a new DOMDocument
+	$agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+	ini_set('user_agent', $agent);
         $doc = new DOMDocument();
     
         // Suppress errors for invalid HTML, if needed

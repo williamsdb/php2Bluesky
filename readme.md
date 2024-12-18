@@ -102,6 +102,8 @@ Requirements are very simple, it requires the following:
 
 Here's a few examples to get you started. 
 
+Note: connection to the Bluesky API is made via Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) which this makes a connection to Bluesky and manages tokens etc. See [here](https://github.com/cjrasmussen/BlueskyApi) for more details.
+
 *  Setup and connect to Bluesky:
 
 ```

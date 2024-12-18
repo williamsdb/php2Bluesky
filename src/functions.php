@@ -14,6 +14,7 @@
         // don't change these unless Bluesky changes the limits
         const MAX_UPLOAD_SIZE = 1000000;
         const MAX_IMAGE_UPLOAD = 4;
+        const MIN_POST_SIZE = 3;
         const MAX_POST_SIZE = 300;
     }
 
@@ -21,13 +22,12 @@
     const linkCardFallback = 'BLANK';
 
     // what happens when text is > maxPostSize
-    const failOverMaxPostSize = FALSE;
+    const failOverMaxPostSize = TRUE;
 
     // set error level
     error_reporting(E_NOTICE);
     ini_set('display_errors', 0);
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+
     function bluesky_connect($handle, $password)
     {
 
@@ -329,7 +329,7 @@
             // Replace URL with spaces to maintain position alignment
             $cleanText = substr_replace($cleanText, str_repeat(' ', $urlLength), $start, $urlLength);
         }
-    
+
         // Regex to find hashtags
         preg_match_all(RegexPatterns::TAG_REGEX, $cleanText, $matches, PREG_OFFSET_CAPTURE);
     
@@ -377,6 +377,8 @@
         ];
     
         // Create a new DOMDocument
+        $agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+        ini_set('user_agent', $agent);
         $doc = new DOMDocument();
     
         // Suppress errors for invalid HTML, if needed
@@ -464,4 +466,25 @@
         }
     }
 
+    function extract_url_base($url) {
+        // Decode the URL first to handle any encoded characters
+        $decodedUrl = urldecode($url);
+    
+        // Remove "https://" (case-insensitive)
+        $decodedUrl = preg_replace('/^https?:\/\//i', '', $decodedUrl);
+    
+        // Find the position of the first "?" (query parameters start here)
+        $pos = strpos($decodedUrl, "?");
+        
+        // Extract the base URL (everything before the "?")
+        if ($pos !== false) {
+            $baseUrl = substr($decodedUrl, 0, $pos);
+        } else {
+            // If "?" is not found, take the entire decoded URL
+            $baseUrl = $decodedUrl;
+        }
+    
+        return $baseUrl;
+    }
+        
 ?>

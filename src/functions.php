@@ -77,14 +77,21 @@
             } elseif (isset($headers['content-type'])) {
                 $mime = $headers['content-type'];
             } else {
-                // shouldn't have got here so issue that needs to be handled!
+                $mime = '';
             }
         }else{
             $mime = mime_content_type($filename);
         }
 
+        // if we can't determine the mime type, die
+        if (empty($mime) || !isset($mime) || !is_string($mime)){
+            die('Could not determine mime type of file');
+        }
+
+        // upload the file to Bluesky
         $response = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
 
+        // return the image blob
         $image = $response->blob;
 
         return $image;

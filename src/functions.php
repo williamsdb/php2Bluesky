@@ -18,11 +18,14 @@
         const MAX_POST_SIZE = 300;
     }
 
-    // what happens when there is no link card image (RANDOM, BLANK or ERROR)
+    // what happens when there is no link card image or missing mime type (RANDOM, BLANK or ERROR)
     const linkCardFallback = 'BLANK';
 
     // what happens when text is > maxPostSize
     const failOverMaxPostSize = TRUE;
+
+    // a random image to use as a fallback
+    const randomImageURL = 'https://picsum.photos/1024/536';
 
     // set error level
     error_reporting(E_NOTICE);
@@ -43,7 +46,55 @@
         // have we been passed a file?
         if (empty($filename)) return;
         
-        // get the mime type, size and basename of the file
+        // get the file mime type
+        if(filter_var($filename, FILTER_VALIDATE_URL)){
+            $headers = get_headers($filename, 1); 
+            if (isset($headers['Content-Type'])) {
+                $mime = $headers['Content-Type'];
+            } elseif (isset($headers['content-type'])) {
+                $mime = $headers['content-type'];
+            } else {
+                $mime = '';
+            }
+        }else{
+            $mime = mime_content_type($filename);
+        }
+
+        // if we can't determine the mime type, use the fallback
+        if (empty($mime) || !isset($mime) || !is_string($mime)){
+            if (strtoupper(linkCardFallback) == 'RANDOM'){
+                $filename = randomImageURL;
+            }elseif (strtoupper(linkCardFallback) == 'BLANK'){
+                if (file_exists(__DIR__.'/blank.png')){
+                    $filename = __DIR__.'/blank.png';
+                }else{
+                    die('BLANK specified for fallback image but blank.png is missing');
+                }
+            }else{
+                die('Could not determine mime type of file');
+            }
+
+            // get the mime type of the fallback image
+            if(filter_var($filename, FILTER_VALIDATE_URL)){
+                $headers = get_headers($filename, 1); 
+                if (isset($headers['Content-Type'])) {
+                    $mime = $headers['Content-Type'];
+                } elseif (isset($headers['content-type'])) {
+                    $mime = $headers['content-type'];
+                } else {
+                    $mime = '';
+                }
+            }else{
+                $mime = mime_content_type($filename);
+            }
+ 
+            // if we can't determine the mime type of the fallback, error
+            if (empty($mime) || !isset($mime) || !is_string($mime)){
+                die('Could not determine mime type of file');
+            }
+        }
+
+        // get the size and basename of the file
         $body = file_get_contents($filename);
         $basename = getFileName($filename);
         $size = strlen($body);
@@ -67,25 +118,6 @@
 
             $body = file_get_contents($fileUploadDir.'/'.$basename);
             unlink($fileUploadDir.'/'.$basename);
-        }
-
-        // get the file mime type
-        if(filter_var($filename, FILTER_VALIDATE_URL)){
-            $headers = get_headers($filename, 1); 
-            if (isset($headers['Content-Type'])) {
-                $mime = $headers['Content-Type'];
-            } elseif (isset($headers['content-type'])) {
-                $mime = $headers['content-type'];
-            } else {
-                $mime = '';
-            }
-        }else{
-            $mime = mime_content_type($filename);
-        }
-
-        // if we can't determine the mime type, die
-        if (empty($mime) || !isset($mime) || !is_string($mime)){
-            die('Could not determine mime type of file');
         }
 
         // upload the file to Bluesky
@@ -425,7 +457,7 @@
                 $image = upload_media_to_bluesky($connection, $img_url);
             }else{
                 if (strtoupper(linkCardFallback) == 'RANDOM'){
-                    $image = upload_media_to_bluesky($connection, 'https://picsum.photos/1024/536');
+                    $image = upload_media_to_bluesky($connection, randomImageURL);
                 }elseif (strtoupper(linkCardFallback) == 'BLANK'){
                     if (file_exists(__DIR__.'/blank.png')){
                         $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');

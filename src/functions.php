@@ -7,7 +7,8 @@
  * @license GNU Lesser General Public License, version 3
  *
  */
-    use cjrasmussen\BlueskyApi\BlueskyApi;
+
+     use cjrasmussen\BlueskyApi\BlueskyApi;
 
     class php2BlueskyException extends Exception {}
 

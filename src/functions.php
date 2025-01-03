@@ -1,12 +1,26 @@
 <?php
-
+/**
+ * Library to make posting to Bluesky from PHP easier.
+ *
+ * @author  Neil Thompson <hi@nei.lt>
+ * @see     https://php2bluesky.dev
+ * @license GNU Lesser General Public License, version 3
+ *
+ */
     use cjrasmussen\BlueskyApi\BlueskyApi;
 
+    class php2BlueskyException extends Exception {}
+
+    class Version
+    {
+        const VERSION = '1.0.0';
+    }
+    
     class RegexPatterns
     {
-        public const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
-        public const URL_REGEX = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<![\.,:;!?])/i';
-        public const TAG_REGEX = '/(^|\s)[#＃]((?!\x{fe0f})[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*[^\d\s\p{P}\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]+[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*)?/u';
+        const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
+        const URL_REGEX = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<![\.,:;!?])/i';
+        const TAG_REGEX = '/(^|\s)[#＃]((?!\x{fe0f})[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*[^\d\s\p{P}\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]+[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*)?/u';
     }
 
     class BlueskyConsts
@@ -68,10 +82,10 @@
                 if (file_exists(__DIR__.'/blank.png')){
                     $filename = __DIR__.'/blank.png';
                 }else{
-                    die('BLANK specified for fallback image but blank.png is missing');
+                    throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.");
                 }
             }else{
-                die('Could not determine mime type of file');
+                throw new php2BlueskyException("Could not determine mime type of file.");
             }
 
             // get the mime type of the fallback image
@@ -90,7 +104,7 @@
  
             // if we can't determine the mime type of the fallback, error
             if (empty($mime) || !isset($mime) || !is_string($mime)){
-                die('Could not determine mime type of file');
+                throw new php2BlueskyException("Could not determine mime type of file.");
             }
         }
 
@@ -136,7 +150,7 @@
 
         // check for post > BlueskyConsts::MAX_POST_SIZE
         if (over_max_post_size($text) && failOverMaxPostSize){
-            die('Provided text greater than '.BlueskyConsts::MAX_POST_SIZE);
+            throw new php2BlueskyException("Provided text greater than ".BlueskyConsts::MAX_POST_SIZE);
         }
 
         // parse for URLs
@@ -425,7 +439,7 @@
     
         // Load the HTML from the URL
         if (!$doc->loadHTMLFile($url)){
-            die('Error loading url '.$url);
+            throw new php2BlueskyException("Error loading url ".$url);
         }
     
         // Restore error handling
@@ -462,10 +476,10 @@
                     if (file_exists(__DIR__.'/blank.png')){
                         $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
                     }else{
-                        die('BLANK specified for link card fallback but blank.png is missing');
+                        throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.");
                     }
                 }else{
-                    die('No suitable image found for link card');
+                    throw new php2BlueskyException("No suitable image found for link card.");
                 }
             }
         } else {

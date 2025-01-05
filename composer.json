@@ -18,7 +18,7 @@
       "type": "library",
     "autoload": {
         "psr-4": {
-            "php2Bluesky\\": "src/"
+            "williamsdb\\php2bluesky\\": "src/"
         }
     },
     "require": {

@@ -8,7 +8,7 @@
 <h3 align="center">php2Bluesky</h3>
 
   <p align="center">
-    A simple library that allows posting to Bluesky via the API.
+    A library that makes posting to Bluesky from PHP simple.
     <br />
   </p>
 </div>

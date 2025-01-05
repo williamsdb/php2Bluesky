@@ -8,13 +8,15 @@
  *
  */
 
-     use cjrasmussen\BlueskyApi\BlueskyApi;
+    namespace williamsdb\php2bluesky;
 
-    class php2BlueskyException extends Exception {}
+    use cjrasmussen\BlueskyApi\BlueskyApi;
+
+    class php2BlueskyException extends \Exception {}
 
     class Version
     {
-        const VERSION = '1.0.0';
+        const VERSION = '2.0.0';
     }
     
     class RegexPatterns
@@ -235,17 +237,37 @@
                 $mediaArray = array();
                 while ($k < count($media) && $k < BlueskyConsts::MAX_IMAGE_UPLOAD){
                     $altText = isset($alt[$k]) ? $alt[$k] : '';
+                    $response = upload_media_to_bluesky($connection, $media[$k]);
+                    // get the image dimensions
+                    $imageInfo = getimagesize($media[$k]);
+                    if ($imageInfo === FALSE) {
+                        throw new php2BlueskyException("Could not get the size of the image.");
+                    }
                     array_push($mediaArray, [
                         'alt' => $altText,
-                        'image' => $media[$k],
+                        'image' => $response,
+                        'aspectRatio' => [
+                            'width' => $imageInfo[0],
+                            'height' => $imageInfo[1]
+                            ]
                         ]);
                     $k++;    
                 }
             }else{
+                $response = upload_media_to_bluesky($connection, $media);
+                // get the image dimensions
+                $imageInfo = getimagesize($media);
+                if ($imageInfo === FALSE) {
+                    throw new php2BlueskyException("Could not get the size of the image.");
+                }
                 $mediaArray = [
                     [
                     'alt' => $alt,
-                    'image' => $media,
+                    'image' => $response,
+                    'aspectRatio' => [
+                        'width' => $imageInfo[0],
+                        'height' => $imageInfo[1]
+                        ]
                     ]
                 ];
             }
@@ -469,13 +491,28 @@
                 if (!parse_url($img_url, PHP_URL_SCHEME)) {
                     $img_url = $url . $img_url;
                 }
-                $image = upload_media_to_bluesky($connection, $img_url);
+                $response = upload_media_to_bluesky($connection, $img_url);
+                // get the image dimensions
+                $imageInfo = getimagesize($img_url);
+                if ($imageInfo === FALSE) {
+                    throw new php2BlueskyException("Could not get the size of the image.");
+                }
             }else{
                 if (strtoupper(linkCardFallback) == 'RANDOM'){
                     $image = upload_media_to_bluesky($connection, randomImageURL);
+                    // get the image dimensions
+                    $imageInfo = getimagesize(randomImageURL);
+                    if ($imageInfo === FALSE) {
+                        throw new php2BlueskyException("Could not get the size of the random image.");
+                    }
                 }elseif (strtoupper(linkCardFallback) == 'BLANK'){
                     if (file_exists(__DIR__.'/blank.png')){
                         $image = upload_media_to_bluesky($connection, __DIR__.'/blank.png');
+                        // get the image dimensions
+                        $imageInfo = getimagesize(__DIR__.'/blank.png');
+                        if ($imageInfo === FALSE) {
+                            throw new php2BlueskyException("Could not get the size of the blank image.");
+                        }
                     }else{
                         throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.");
                     }
@@ -485,6 +522,11 @@
             }
         } else {
             $image = upload_media_to_bluesky($connection, $card["imageurlff"]);
+            // get the image dimensions
+            $imageInfo = getimagesize($card["imageurlff"]);
+            if ($imageInfo === FALSE) {
+                throw new php2BlueskyException("Could not get the size of the image.");
+            }
         }
     
         $embed = '';
@@ -495,7 +537,11 @@
                 'uri' => $card['uri'],
                 'title' => $card['title'],
                 'description' => $card['description'],
-                'thumb' => $image,
+                'thumb' => $response,
+                'aspectRatio' => [
+                    'width' => $imageInfo[0],
+                    'height' => $imageInfo[1]
+                ]
             ],
         ],
         ];

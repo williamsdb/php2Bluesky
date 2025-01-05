@@ -1,4 +1,4 @@
-composer.*
+composer.json
 vendor/
 bin/
 src/test.php

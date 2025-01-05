@@ -19,7 +19,10 @@
     "autoload": {
         "psr-4": {
             "williamsdb\\php2bluesky\\": "src/"
-        }
+        },
+        "files": [
+            "src/functions.php"
+        ]
     },
     "require": {
         "php": "^8.0",

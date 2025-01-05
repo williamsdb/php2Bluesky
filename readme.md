@@ -8,7 +8,7 @@
 <h3 align="center">php2Bluesky</h3>
 
   <p align="center">
-    A library that makes posting to Bluesky from PHP simple.
+    A simple library that allows posting to Bluesky via the API.
     <br />
   </p>
 </div>
@@ -46,7 +46,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky which somewhat ironically has its roots in Twitter where it was started as an internal project. Bluesky is still in beta and is invite-only. I worry about Bluesky's long-term given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today which is posting to Bluesky via the API.
+With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky, which somewhat ironically has its roots in Twitter, where it was started as an internal project. I worry about Bluesky's long-term, given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today, which is posting to Bluesky via the API.
+
+I needed a way to post to Bluesky from PHP and so I searched for a library to help and when I couldn't find one I wrote this.
+
 
 <a href='https://ko-fi.com/Y8Y0POEES' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
@@ -66,15 +69,20 @@ With all the uncertainty surrounding the future of X (née Twitter), I decided t
 <!-- GETTING STARTED -->
 ## Getting Started
 
+***NOTE*** This is for v2 of php2Bluesky. If you are looking for the v1 details you can find that [here](https://github.com/williamsdb/php2Bluesky/blob/8b137617bda0bd9dd97462966a8d9404e08ea807/readme.md). 
+
 Running the script is very straightforward:
 
-1. download the code/clone the repository
-2. install [composer](https://getcomposer.org/)
-3. add the BlueskyAPI 
+1. install [composer](https://getcomposer.org/)
+2. add the BlueskyAPI 
 
 > composer.phar require cjrasmussen/bluesky-api
 
-Now you can inspect and update index.php to get some examples. 
+3. add php2Bluesky
+
+> composer.phar require williamsdb/php2bluesky
+
+Now you can inspect and update [example.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/example.php) to get some examples. 
 
 If you are interested in what is happening under the hood then read [this series of blog posts](https://www.spokenlikeageek.com/tag/bluesky/).
 
@@ -88,10 +96,7 @@ Requirements are very simple, it requires the following:
 
 ### Installation
 
-1. Clone the repo:
-   ```sh
-   git clone https://github.com/williamsdb/php2Bluesky.git
-   ```
+1. As above
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -107,14 +112,17 @@ Note: connection to the Bluesky API is made via Clark Rasmussen's [BlueskyApi](h
 *  Setup and connect to Bluesky:
 
 ```
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/functions.php';
+require __DIR__ . '/vendor/autoload.php';
+
+use williamsdb\php2bluesky\php2Bluesky;
+
+$php2Bluesky = new php2Bluesky();
 
 $handle = 'yourhandle.bsky.social';
 $password = 'abcd-efgh-ijkl-mnop';
     
 // connect to Bluesky API
-$connection = bluesky_connect($handle, $password);
+$php2Bluesky->$connection = bluesky_connect($handle, $password);
 ```
 
 * Sending text with tags
@@ -122,8 +130,12 @@ $connection = bluesky_connect($handle, $password);
 ```
 $text = "This is some text with a #hashtag.";
 
-$response = post_to_bluesky($connection, $text);
+$response = $php2Bluesky->post_to_bluesky($connection, $text);
 print_r($response);
+if (!isset($response->error)){
+    $url = $php2Bluesky->permalink_from_response($response, $handle);
+    echo $url.PHP_EOL;            
+}
 ```
 
 * Uploading a post with a single image and embedded url
@@ -133,10 +145,12 @@ $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profil
 $text = 'Screenshot of Bluesky';
 $alt = 'This is the screenshot that Wikipedia uses for their https://en.wikipedia.org/wiki/Bluesky entry.';
 
-$image = upload_media_to_bluesky($connection, $filename1);
-
-$response = post_to_bluesky($connection, $text, $image, '', $alt);
+$php2Bluesky->$response = post_to_bluesky($connection, $text, $filename1, '', $alt);
 print_r($response);
+if (!isset($response->error)){
+    $url = $php2Bluesky->permalink_from_response($response, $handle);
+    echo $url.PHP_EOL;            
+}
 ```
 
 * Uploading a post with multiple images (both local and remote)
@@ -149,15 +163,15 @@ $filename4 = '/Users/neilthompson/Development/php2Bluesky/Screenshot2.png';
 $text = 'An example of four images taken both from a local machine and remote locations with some alt tags';
     
 // send multiple images with text
-$image1 = upload_media_to_bluesky($connection, $filename1);
-$image2 = upload_media_to_bluesky($connection, $filename2);
-$image3 = upload_media_to_bluesky($connection, $filename3);
-$image4 = upload_media_to_bluesky($connection, $filename4);
-$imageArray = array($image1, $image2, $image3, $image4); 
+$imageArray = array($filename1, $filename2, $filename3, $filename4); 
 $alt = array('this has an alt', 'so does this');
     
-$response = post_to_bluesky($connection, $text, $imageArray, '', $alt);
+$response = $php2Bluesky->post_to_bluesky($connection, $text, $imageArray, '', $alt);
 print_r($response);
+if (!isset($response->error)){
+    $url = $php2Bluesky->permalink_from_response($response, $handle);
+    echo $url.PHP_EOL;            
+}
 ```` 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

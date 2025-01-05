@@ -148,7 +148,6 @@
         public function post_to_bluesky($connection, $text, $media='', $link='', $alt='')
         {
 
-
             // check for post > BlueskyConsts::MAX_POST_SIZE
             if ($this->over_max_post_size($text) && self::failOverMaxPostSize){
                 throw new php2BlueskyException("Provided text greater than ".BlueskyConsts::MAX_POST_SIZE);
@@ -303,7 +302,8 @@
         }
 
         // take a response from post_to_bluesky and return a permalink
-        public function permalink_from_response($response, $handle){
+        public function permalink_from_response($response, $handle)
+        {
 
             // Extract the post id
             preg_match('/\/([^\/]+)$/', $response->uri, $matches);
@@ -317,7 +317,7 @@
 
         }
 
-        private function get_from_bluesky($connection, $link)
+        public function get_from_bluesky($connection, $link)
         {
             // Extract the account name
             preg_match('/\/([^\/]+)\/([^\/]+)\/([^\/]+)/', $link, $matches);

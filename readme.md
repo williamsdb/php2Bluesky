@@ -82,7 +82,7 @@ Running the script is very straightforward:
 
 > composer.phar require williamsdb/php2bluesky
 
-Now you can inspect and update [example.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/example.php) to get some examples. 
+Now you can inspect [example.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/example.php) to get some examples and/or see below. 
 
 If you are interested in what is happening under the hood then read [this series of blog posts](https://www.spokenlikeageek.com/tag/bluesky/).
 
@@ -173,6 +173,15 @@ if (!isset($response->error)){
     echo $url.PHP_EOL;            
 }
 ```` 
+
+* Sending parameters when connecting to override defaults
+
+````
+$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
+                               $failOverMaxPostSize = FALSE, 
+                               $randomImageURL = 'https://picsum.photos/1024/536',
+                               $fileUploadDir='/tmp');
+````
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

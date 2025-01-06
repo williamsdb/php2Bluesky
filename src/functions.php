@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.3';
+        const VERSION = '2.0.4';
     }
     
     class RegexPatterns
@@ -35,24 +35,36 @@
         const MAX_POST_SIZE = 300;
     }
 
+    /**
+     * Class for building array to send to Bluesky API
+     */
     class php2Bluesky
     {
         // what happens when there is no link card image or missing mime type (RANDOM, BLANK or ERROR)
-        const linkCardFallback = 'BLANK';
+        private string $linkCardFallback;
 
         // what happens when text is > maxPostSize
-        const failOverMaxPostSize = TRUE;
+        private string $failOverMaxPostSize;
 
         // a random image to use as a fallback
-        const randomImageURL = 'https://picsum.photos/1024/536';
+        private string $randomImageURL;
+
+        // folder to use for temporary files
+        private string $fileUploadDir;
+
+        public function __construct($linkCardFallback = 'BLANK', $failOverMaxPostSize = FALSE, $randomImageURL = 'https://picsum.photos/1024/536', $fileUploadDir = '/tmp')
+        {
+            $this->linkCardFallback = $linkCardFallback;
+            $this->failOverMaxPostSize = $failOverMaxPostSize;
+            $this->randomImageURL = $randomImageURL;
+            $this->fileUploadDir = $fileUploadDir;
+        }
 
         public function bluesky_connect($handle, $password)
         {
-
             $connection = new BlueskyApi();
             $connection->auth($handle, $password);
             return $connection;
-
         }
 
         private function upload_media_to_bluesky($connection, $filename, $fileUploadDir = '/tmp')
@@ -77,9 +89,9 @@
 
             // if we can't determine the mime type, use the fallback
             if (empty($mime) || !isset($mime) || !is_string($mime)){
-                if (strtoupper(self::linkCardFallback) == 'RANDOM'){
-                    $filename = self::randomImageURL;
-                }elseif (strtoupper(self::linkCardFallback) == 'BLANK'){
+                if (strtoupper($this->linkCardFallback) == 'RANDOM'){
+                    $filename = $this->randomImageURL;
+                }elseif (strtoupper($this->linkCardFallback) == 'BLANK'){
                     if (file_exists(__DIR__.'/blank.png')){
                         $filename = __DIR__.'/blank.png';
                     }else{
@@ -149,7 +161,7 @@
         {
 
             // check for post > BlueskyConsts::MAX_POST_SIZE
-            if ($this->over_max_post_size($text) && self::failOverMaxPostSize){
+            if ($this->over_max_post_size($text) && $this->failOverMaxPostSize){
                 throw new php2BlueskyException("Provided text greater than ".BlueskyConsts::MAX_POST_SIZE);
             }
 
@@ -234,7 +246,7 @@
                     $mediaArray = array();
                     while ($k < count($media) && $k < BlueskyConsts::MAX_IMAGE_UPLOAD){
                         $altText = isset($alt[$k]) ? $alt[$k] : '';
-                        $response = $this->upload_media_to_bluesky($connection, $media[$k]);
+                        $response = $this->upload_media_to_bluesky($connection, $media[$k], $this->fileUploadDir);
                         // get the image dimensions
                         $imageInfo = getimagesize($media[$k]);
                         if ($imageInfo === FALSE) {
@@ -251,7 +263,7 @@
                         $k++;    
                     }
                 }else{
-                    $response = $this->upload_media_to_bluesky($connection, $media);
+                    $response = $this->upload_media_to_bluesky($connection, $media, $this->fileUploadDir);
                     // get the image dimensions
                     $imageInfo = getimagesize($media);
                     if ($imageInfo === FALSE) {
@@ -489,23 +501,23 @@
                     if (!parse_url($img_url, PHP_URL_SCHEME)) {
                         $img_url = $url . $img_url;
                     }
-                    $response = $this->upload_media_to_bluesky($connection, $img_url);
+                    $response = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
                     // get the image dimensions
                     $imageInfo = getimagesize($img_url);
                     if ($imageInfo === FALSE) {
                         throw new php2BlueskyException("Could not get the size of the image.");
                     }
                 }else{
-                    if (strtoupper(self::linkCardFallback) == 'RANDOM'){
-                        $image = $this->upload_media_to_bluesky($connection, self::randomImageURL);
+                    if (strtoupper($this->linkCardFallback) == 'RANDOM'){
+                        $image = $this->upload_media_to_bluesky($connection, $this->randomImageURL,$this->fileUploadDir);
                         // get the image dimensions
-                        $imageInfo = getimagesize(self::randomImageURL);
+                        $imageInfo = getimagesize($this->randomImageURL);
                         if ($imageInfo === FALSE) {
                             throw new php2BlueskyException("Could not get the size of the random image.");
                         }
-                    }elseif (strtoupper(self::linkCardFallback) == 'BLANK'){
+                    }elseif (strtoupper($this->linkCardFallback) == 'BLANK'){
                         if (file_exists(__DIR__.'/blank.png')){
-                            $image = $this->upload_media_to_bluesky($connection, __DIR__.'/blank.png');
+                            $image = $this->upload_media_to_bluesky($connection, __DIR__.'/blank.png', $this->fileUploadDir);
                             // get the image dimensions
                             $imageInfo = getimagesize(__DIR__.'/blank.png');
                             if ($imageInfo === FALSE) {
@@ -519,7 +531,7 @@
                     }
                 }
             } else {
-                $image = $this->upload_media_to_bluesky($connection, $card["imageurlff"]);
+                $image = $this->upload_media_to_bluesky($connection, $card["imageurlff"], $this->fileUploadDir);
                 // get the image dimensions
                 $imageInfo = getimagesize($card["imageurlff"]);
                 if ($imageInfo === FALSE) {

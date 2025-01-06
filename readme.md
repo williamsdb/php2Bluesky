@@ -122,7 +122,7 @@ $handle = 'yourhandle.bsky.social';
 $password = 'abcd-efgh-ijkl-mnop';
     
 // connect to Bluesky API
-$php2Bluesky->$connection = bluesky_connect($handle, $password);
+$connection = $php2Bluesky->bluesky_connect($handle, $password);
 ```
 
 * Sending text with tags
@@ -145,7 +145,7 @@ $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profil
 $text = 'Screenshot of Bluesky';
 $alt = 'This is the screenshot that Wikipedia uses for their https://en.wikipedia.org/wiki/Bluesky entry.';
 
-$php2Bluesky->$response = post_to_bluesky($connection, $text, $filename1, '', $alt);
+$response = $php2Bluesky->post_to_bluesky($connection, $text, $filename1, '', $alt);
 print_r($response);
 if (!isset($response->error)){
     $url = $php2Bluesky->permalink_from_response($response, $handle);

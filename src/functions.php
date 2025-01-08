@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.4';
+        const VERSION = '2.0.5';
     }
     
     class RegexPatterns
@@ -269,6 +269,12 @@
                     if ($imageInfo === FALSE) {
                         throw new php2BlueskyException("Could not get the size of the image.");
                     }
+                    
+                    // has an array been passed?
+                    if (is_array($alt)){
+                        $alt= isset($alt[0]) ? $alt[0] : '';;
+                    }
+
                     $mediaArray = [
                         [
                         'alt' => $alt,

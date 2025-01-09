@@ -16,14 +16,14 @@
 
     class Version
     {
-        const VERSION = '2.0.5';
+        const VERSION = '2.0.6';
     }
     
     class RegexPatterns
     {
         const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
         const URL_REGEX = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<![\.,:;!?])/i';
-        const TAG_REGEX = '/(^|\s)[#＃]((?!\x{fe0f})[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*[^\d\s\p{P}\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]+[^\s\x{00AD}\x{2060}\x{200A}\x{200B}\x{200C}\x{200D}\x{20e2}]*)?/u';
+        const TAG_REGEX = '/(^|[\\s\\r\\n])[#＃]((?!\\x{fe0f})[^\s\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]*[^\d\s\p{P}\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]+[^\s\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]*)/u';
     }
 
     class BlueskyConsts
@@ -424,32 +424,32 @@
 
             // Regex to find hashtags
             preg_match_all(RegexPatterns::TAG_REGEX, $cleanText, $matches, PREG_OFFSET_CAPTURE);
-        
+
             $hashtagData = array();
-        
+
             foreach ($matches[0] as $match) {
                 $originalHashtag = $match[0]; // Capture the hashtag as it appears in the text
                 $start = $match[1];
-        
-                // Exclude preceding space (if any) from the start
-                if ($originalHashtag[0] === ' ') {
-                    $start += 1;
+
+                // Exclude preceding space or newline (if any) from the start
+                if (in_array($originalHashtag[0], [' ', "\n", "\r"])) {
+                    $start += 1; // Adjust start to exclude the delimiter
                     $originalHashtag = substr($originalHashtag, 1);
                 }
-        
+
                 // Clean the hashtag (removing trailing punctuation)
                 $cleanedHashtag = $this->clean_hashtag($originalHashtag);
-        
+
                 // Calculate the correct end position after cleaning
                 $end = $start + strlen($cleanedHashtag);
-        
+
                 $hashtagData[] = array(
                     'start' => $start,
                     'end' => $end,
                     'hashtag' => substr($cleanedHashtag, 1) // Remove the '#' or '＃' prefix
                 );
             }
-        
+
             return $hashtagData;
         }
         

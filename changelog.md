@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [2.0.6] - 2025-01-09
+### Added
+- Fix an bug with carriage returns before hashtags
+
+## [2.0.5] - 2025-01-08
+### Added
+- Fix for when an array is passed for alts with a single image
+
+## [2.0.4] - 2025-01-06
+### Added
+- Allowed parameters to be passed through
+
 ## [2.0.3] - 2025-01-05
 ### Added
 - Updated the README with v2 examples

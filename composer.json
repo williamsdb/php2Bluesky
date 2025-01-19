@@ -26,6 +26,8 @@
     },
     "require": {
         "php": "^8.0",
-        "cjrasmussen/bluesky-api": "^2.0"
+        "cjrasmussen/bluesky-api": "^2.0",
+        "ext-dom": "*",
+        "ext-gd": "*"
     }
 }

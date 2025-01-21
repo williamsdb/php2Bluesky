@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.6';
+        const VERSION = '2.0.7';
     }
     
     class RegexPatterns
@@ -157,8 +157,11 @@
 
         }
 
-        public function post_to_bluesky($connection, $text, $media='', $link='', $alt='')
+        public function post_to_bluesky($connection, $text, $media='', $link='', $alt='', $linkCardFallback = 'BLANK')
         {
+
+            // if set overrider the default setting for link card fallback for this post
+            $this->linkCardFallback = $linkCardFallback;
 
             // check for post > BlueskyConsts::MAX_POST_SIZE
             if ($this->over_max_post_size($text) && $this->failOverMaxPostSize){

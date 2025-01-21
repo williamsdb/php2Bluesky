@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.0.7] - 2025-01-21
+### Added
+- allow link card fallback to be overridden on a post by post basis
 
 ## [2.0.6] - 2025-01-09
 ### Added

@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.7';
+        const VERSION = '2.0.8';
     }
     
     class RegexPatterns
@@ -157,11 +157,13 @@
 
         }
 
-        public function post_to_bluesky($connection, $text, $media='', $link='', $alt='', $linkCardFallback = 'BLANK')
+        public function post_to_bluesky($connection, $text, $media='', $link='', $alt='', $linkCardFallback = 'UNSET')
         {
 
             // if set overrider the default setting for link card fallback for this post
-            $this->linkCardFallback = $linkCardFallback;
+            if ($linkCardFallback != 'UNSET'){
+                $this->linkCardFallback = $linkCardFallback;                
+            }
 
             // check for post > BlueskyConsts::MAX_POST_SIZE
             if ($this->over_max_post_size($text) && $this->failOverMaxPostSize){
@@ -496,11 +498,13 @@
                 $card["title"] = $title_tag[0]->nodeValue;
             }
         
+            // If there is an "og:description" meta tag, use that as the description
             $description_tag = $xpath->query('//meta[@property="og:description"]/@content');
             if ($description_tag->length > 0) {
                 $card["description"] = $description_tag[0]->nodeValue;
             }
         
+            // If there is an "og:image" meta tag, use that as the image
             if($card["imageurlff"] == "") {
                 // If there is an "og:image" meta tag, fetch and upload that image
                 $image_tag = $xpath->query('//meta[@property="og:image"]/@content');
@@ -510,7 +514,7 @@
                     if (!parse_url($img_url, PHP_URL_SCHEME)) {
                         $img_url = $url . $img_url;
                     }
-                    $response = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
+                    $image = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
                     // get the image dimensions
                     $imageInfo = getimagesize($img_url);
                     if ($imageInfo === FALSE) {
@@ -556,7 +560,7 @@
                     'uri' => $card['uri'],
                     'title' => $card['title'],
                     'description' => $card['description'],
-                    'thumb' => $response,
+                    'thumb' => $image,
                     'aspectRatio' => [
                         'width' => $imageInfo[0],
                         'height' => $imageInfo[1]

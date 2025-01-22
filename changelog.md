@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.8] - 2025-01-22
+### Added
+- fixed a bug in fallback override and another in getting link card images
+
 ## [2.0.7] - 2025-01-21
 ### Added
 - allow link card fallback to be overridden on a post by post basis

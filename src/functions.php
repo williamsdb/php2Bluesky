@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.8';
+        const VERSION = '2.0.9';
     }
     
     class RegexPatterns
@@ -75,12 +75,15 @@
             
             // get the file mime type
             if(filter_var($filename, FILTER_VALIDATE_URL)){
-                $headers = get_headers($filename, 1); 
-                if (isset($headers['Content-Type'])) {
-                    $mime = $headers['Content-Type'];
-                } elseif (isset($headers['content-type'])) {
-                    $mime = $headers['content-type'];
-                } else {
+                if ($headers = get_headers($filename, 1)){
+                    if (isset($headers['Content-Type'])) {
+                        $mime = $headers['Content-Type'];
+                    } elseif (isset($headers['content-type'])) {
+                        $mime = $headers['content-type'];
+                    } else {
+                        $mime = '';
+                    }    
+                }else{
                     $mime = '';
                 }
             }else{
@@ -607,6 +610,38 @@
                 $baseUrl = $decodedUrl;
             }
         
+            return $baseUrl;
+        }
+
+        public function get_rate_limits($connection) {
+
+            // Get the response header from the last request
+            $responseHeader = $connection->getResponseHeader();
+
+            // Split the response header into individual lines
+            $lines = explode("\n", $responseHeader);
+            
+            // Initialize an array to store the RateLimit fields
+            $rateLimit = [];
+            foreach ($lines as $line) {
+                // Extract RateLimit fields
+                if (stripos($line, 'RateLimit-Limit') !== false) {
+                    $rateLimit['Limit'] = trim(explode(':', $line, 2)[1]);
+                } elseif (stripos($line, 'RateLimit-Remaining') !== false) {
+                    $rateLimit['Remaining'] = trim(explode(':', $line, 2)[1]);
+                } elseif (stripos($line, 'RateLimit-Reset') !== false) {
+                    $rateLimit['Reset'] = trim(explode(':', $line, 2)[1]);
+                }
+            }
+            
+            // Convert RateLimit-Reset to human-readable format
+            if (isset($rateLimit['Reset'])) {
+                $rateLimit['Reset_Human'] = date('Y-m-d H:i:s', $rateLimit['Reset']);
+            }
+            
+            // Output the results
+            print_r($rateLimit);
+                    die;
             return $baseUrl;
         }
 

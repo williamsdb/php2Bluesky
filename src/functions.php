@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.9';
+        const VERSION = '2.0.10';
     }
     
     class RegexPatterns
@@ -40,7 +40,8 @@
      */
     class php2Bluesky
     {
-        // what happens when there is no link card image or missing mime type (RANDOM, BLANK or ERROR)
+
+        // what happens when there is no link card image or missing mime type (RANDOM, BLANK, ERROR or URL)
         private string $linkCardFallback;
 
         // what happens when text is > maxPostSize
@@ -72,18 +73,26 @@
 
             // have we been passed a file?
             if (empty($filename)) return;
-            
+
             // get the file mime type
             if(filter_var($filename, FILTER_VALIDATE_URL)){
-                if ($headers = get_headers($filename, 1)){
-                    if (isset($headers['Content-Type'])) {
-                        $mime = $headers['Content-Type'];
-                    } elseif (isset($headers['content-type'])) {
-                        $mime = $headers['content-type'];
-                    } else {
-                        $mime = '';
-                    }    
-                }else{
+                // can we access the file?
+                $context = stream_context_create(['http' => ['ignore_errors' => true]]);
+                if (@file_get_contents($filename, false, $context) !== false) {
+                    if ($headers = get_headers($filename, 1)) {
+                        if ($headers = get_headers($filename, 1)){
+                            if (isset($headers['Content-Type'])) {
+                                $mime = $headers['Content-Type'];
+                            } elseif (isset($headers['content-type'])) {
+                                $mime = $headers['content-type'];
+                            } else {
+                                $mime = '';
+                            }    
+                        }else{
+                            $mime = '';
+                        }
+                    }
+                } else {
                     $mime = '';
                 }
             }else{
@@ -100,6 +109,8 @@
                     }else{
                         throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.");
                     }
+                }elseif (strtoupper(substr($this->linkCardFallback,0,3)) == 'URL'){
+                    $filename = substr($this->linkCardFallback,4);
                 }else{
                     throw new php2BlueskyException("Could not determine mime type of file.");
                 }
@@ -156,7 +167,13 @@
             // return the image blob
             $image = $response->blob;
 
-            return $image;
+            // get the image dimensions
+            $imageInfo = getimagesize($filename);
+            if ($imageInfo === FALSE) {
+                throw new php2BlueskyException("Could not get the size of the image.");
+            }
+
+            return [$image, $imageInfo];
 
         }
 
@@ -254,12 +271,9 @@
                     $mediaArray = array();
                     while ($k < count($media) && $k < BlueskyConsts::MAX_IMAGE_UPLOAD){
                         $altText = isset($alt[$k]) ? $alt[$k] : '';
-                        $response = $this->upload_media_to_bluesky($connection, $media[$k], $this->fileUploadDir);
-                        // get the image dimensions
-                        $imageInfo = getimagesize($media[$k]);
-                        if ($imageInfo === FALSE) {
-                            throw new php2BlueskyException("Could not get the size of the image.");
-                        }
+                        $result = $this->upload_media_to_bluesky($connection, $media[$k], $this->fileUploadDir);
+                        $response = $result[0];
+                        $imageInfo = $result[1];
                         array_push($mediaArray, [
                             'alt' => $altText,
                             'image' => $response,
@@ -271,13 +285,10 @@
                         $k++;    
                     }
                 }else{
-                    $response = $this->upload_media_to_bluesky($connection, $media, $this->fileUploadDir);
-                    // get the image dimensions
-                    $imageInfo = getimagesize($media);
-                    if ($imageInfo === FALSE) {
-                        throw new php2BlueskyException("Could not get the size of the image.");
-                    }
-                    
+                    $result = $this->upload_media_to_bluesky($connection, $media, $this->fileUploadDir);
+                    $response = $result[0];
+                    $imageInfo = $result[1];
+                
                     // has an array been passed?
                     if (is_array($alt)){
                         $alt= isset($alt[0]) ? $alt[0] : '';;
@@ -517,42 +528,35 @@
                     if (!parse_url($img_url, PHP_URL_SCHEME)) {
                         $img_url = $url . $img_url;
                     }
-                    $image = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
-                    // get the image dimensions
-                    $imageInfo = getimagesize($img_url);
-                    if ($imageInfo === FALSE) {
-                        throw new php2BlueskyException("Could not get the size of the image.");
-                    }
+                    $result = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
+                    $image = $result[0];
+                    $imageInfo = $result[1];
                 }else{
                     if (strtoupper($this->linkCardFallback) == 'RANDOM'){
-                        $image = $this->upload_media_to_bluesky($connection, $this->randomImageURL,$this->fileUploadDir);
-                        // get the image dimensions
-                        $imageInfo = getimagesize($this->randomImageURL);
-                        if ($imageInfo === FALSE) {
-                            throw new php2BlueskyException("Could not get the size of the random image.");
-                        }
+                        $result = $this->upload_media_to_bluesky($connection, $this->randomImageURL,$this->fileUploadDir);
+                        $image = $result[0];
+                        $imageInfo = $result[1];
                     }elseif (strtoupper($this->linkCardFallback) == 'BLANK'){
                         if (file_exists(__DIR__.'/blank.png')){
-                            $image = $this->upload_media_to_bluesky($connection, __DIR__.'/blank.png', $this->fileUploadDir);
-                            // get the image dimensions
-                            $imageInfo = getimagesize(__DIR__.'/blank.png');
-                            if ($imageInfo === FALSE) {
-                                throw new php2BlueskyException("Could not get the size of the blank image.");
-                            }
+                            $result = $this->upload_media_to_bluesky($connection, __DIR__.'/blank.png', $this->fileUploadDir);
+                            $image = $result[0];
+                            $imageInfo = $result[1];
                         }else{
                             throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.");
                         }
+                    }elseif (strtoupper(substr($this->linkCardFallback,0,3)) == 'URL'){
+                        $filename = substr($this->linkCardFallback,4);
+                        $result = $this->upload_media_to_bluesky($connection, $filename, $this->fileUploadDir);
+                        $image = $result[0];
+                        $imageInfo = $result[1];
                     }else{
                         throw new php2BlueskyException("No suitable image found for link card.");
                     }
                 }
             } else {
-                $image = $this->upload_media_to_bluesky($connection, $card["imageurlff"], $this->fileUploadDir);
-                // get the image dimensions
-                $imageInfo = getimagesize($card["imageurlff"]);
-                if ($imageInfo === FALSE) {
-                    throw new php2BlueskyException("Could not get the size of the image.");
-                }
+                $result = $this->upload_media_to_bluesky($connection, $card["imageurlff"], $this->fileUploadDir);
+                $image = $result[0];
+                $imageInfo = $result[1];
             }
         
             $embed = '';
@@ -616,7 +620,7 @@
         public function get_rate_limits($connection) {
 
             // Get the response header from the last request
-            $responseHeader = $connection->getResponseHeader();
+            $responseHeader = $connection->getLastResponseHeader();
 
             // Split the response header into individual lines
             $lines = explode("\n", $responseHeader);
@@ -639,10 +643,7 @@
                 $rateLimit['Reset_Human'] = date('Y-m-d H:i:s', $rateLimit['Reset']);
             }
             
-            // Output the results
-            print_r($rateLimit);
-                    die;
-            return $baseUrl;
+            return $rateLimit;
         }
 
     }

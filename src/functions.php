@@ -16,7 +16,7 @@
 
     class Version
     {
-        const VERSION = '2.0.10';
+        const VERSION = '2.0.11';
     }
     
     class RegexPatterns
@@ -117,11 +117,20 @@
 
                 // get the mime type of the fallback image
                 if(filter_var($filename, FILTER_VALIDATE_URL)){
-                    $headers = get_headers($filename, 1); 
-                    if (isset($headers['Content-Type'])) {
-                        $mime = $headers['Content-Type'];
-                    } elseif (isset($headers['content-type'])) {
-                        $mime = $headers['content-type'];
+                    if (@file_get_contents($filename, false, $context) !== false) {
+                        if ($headers = get_headers($filename, 1)) {
+                            if ($headers = get_headers($filename, 1)){
+                                if (isset($headers['Content-Type'])) {
+                                    $mime = $headers['Content-Type'];
+                                } elseif (isset($headers['content-type'])) {
+                                    $mime = $headers['content-type'];
+                                } else {
+                                    $mime = '';
+                                }    
+                            }else{
+                                $mime = '';
+                            }
+                        }
                     } else {
                         $mime = '';
                     }

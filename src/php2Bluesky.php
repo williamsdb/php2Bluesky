@@ -11,29 +11,13 @@
     namespace williamsdb\php2bluesky;
 
     use cjrasmussen\BlueskyApi\BlueskyApi;
+    use williamsdb\php2bluesky\BlueskyConsts;
+    use williamsdb\php2bluesky\php2BlueskyException;
+    use williamsdb\php2bluesky\RegexPatterns;
+    use williamsdb\php2bluesky\Version; // Non utilisé
 
-    class php2BlueskyException extends \Exception {}
 
-    class Version
-    {
-        const VERSION = '2.0.11';
-    }
-    
-    class RegexPatterns
-    {
-        const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';
-        const URL_REGEX = '/(https?:\/\/[^\s,)\.]+(?:\.[^\s,)\.]+)*)(?<![\.,:;!?])/i';
-        const TAG_REGEX = '/(^|[\\s\\r\\n])[#＃]((?!\\x{fe0f})[^\s\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]*[^\d\s\p{P}\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]+[^\s\\x{00AD}\\x{2060}\\x{200A}\\x{200B}\\x{200C}\\x{200D}\\x{20e2}]*)/u';
-    }
 
-    class BlueskyConsts
-    {
-        // don't change these unless Bluesky changes the limits
-        const MAX_UPLOAD_SIZE = 1000000;
-        const MAX_IMAGE_UPLOAD = 4;
-        const MIN_POST_SIZE = 3;
-        const MAX_POST_SIZE = 300;
-    }
 
     /**
      * Class for building array to send to Bluesky API
@@ -87,7 +71,7 @@
                                 $mime = $headers['content-type'];
                             } else {
                                 $mime = '';
-                            }    
+                            }
                         }else{
                             $mime = '';
                         }
@@ -126,7 +110,7 @@
                                     $mime = $headers['content-type'];
                                 } else {
                                     $mime = '';
-                                }    
+                                }
                             }else{
                                 $mime = '';
                             }
@@ -137,7 +121,7 @@
                 }else{
                     $mime = mime_content_type($filename);
                 }
-    
+
                 // if we can't determine the mime type of the fallback, error
                 if (empty($mime) || !isset($mime) || !is_string($mime)){
                     throw new php2BlueskyException("Could not determine mime type of file.");
@@ -191,7 +175,7 @@
 
             // if set overrider the default setting for link card fallback for this post
             if ($linkCardFallback != 'UNSET'){
-                $this->linkCardFallback = $linkCardFallback;                
+                $this->linkCardFallback = $linkCardFallback;
             }
 
             // check for post > BlueskyConsts::MAX_POST_SIZE
@@ -212,7 +196,7 @@
                     "features" => [
                         [
                             '$type' => "app.bsky.richtext.facet#link",
-                            'uri' => $url['url'], 
+                            'uri' => $url['url'],
                         ],
                     ],
                     ];
@@ -234,7 +218,7 @@
                     "features" => [
                         [
                             '$type' => "app.bsky.richtext.facet#mention",
-                            'did' => $mention['did'], 
+                            'did' => $mention['did'],
                         ],
                     ],
                     ];
@@ -256,7 +240,7 @@
                     "features" => [
                         [
                             '$type' => "app.bsky.richtext.facet#tag",
-                            'tag' => $hashtag['hashtag'], 
+                            'tag' => $hashtag['hashtag'],
                         ],
                     ],
                     ];
@@ -291,13 +275,13 @@
                                 'height' => $imageInfo[1]
                                 ]
                             ]);
-                        $k++;    
+                        $k++;
                     }
                 }else{
                     $result = $this->upload_media_to_bluesky($connection, $media, $this->fileUploadDir);
                     $response = $result[0];
                     $imageInfo = $result[1];
-                
+
                     // has an array been passed?
                     if (is_array($alt)){
                         $alt= isset($alt[0]) ? $alt[0] : '';;
@@ -314,7 +298,7 @@
                         ]
                     ];
                 }
-            
+
                 $embed = [
                     'embed' => [
                         '$type' => 'app.bsky.embed.images',
@@ -344,7 +328,7 @@
 
             // send to bluesky
             return $connection->request('POST', 'com.atproto.repo.createRecord', $args);
-    
+
         }
 
         // take a response from post_to_bluesky and return a permalink
@@ -368,7 +352,7 @@
             // Extract the account name
             preg_match('/\/([^\/]+)\/([^\/]+)\/([^\/]+)/', $link, $matches);
             $account = isset($matches[3]) ? $matches[3] : '';
-            
+
             // Extract the post id
             preg_match_all('/\/([^\/]+)/', $link, $matches);
             $postId= isset($matches[1][4]) ? $matches[1][4] : '';
@@ -378,7 +362,7 @@
                 'collection' => 'app.bsky.feed.post',
                 'rkey' => $postId
             ];
-        
+
             // retrieve the post from Bluesky using the extracted account name and post id
             return $connection->request('GET', 'com.atproto.repo.getRecord', $args);
         }
@@ -389,7 +373,7 @@
             preg_match_all(RegexPatterns::MENTION_REGEX, $text, $matches, PREG_OFFSET_CAPTURE);
 
             $mentionsData = array();
-            
+
             foreach ($matches[1] as $match) {
                 $did = $this->get_did_from_handle($connection, substr($match[0], 1));
                 if (!empty($did->did)){
@@ -398,7 +382,7 @@
                         "start" => $match[1],
                         "end" => $match[1] + strlen($match[0]),
                         "did" => $did->did,
-                    ];    
+                    ];
                 }
             }
             return $mentionsData;
@@ -409,9 +393,9 @@
             $args = [
                 'handle' => $handle,
             ];
-        
+
             // send to bluesky to get the did for the given handle
-            return  $connection->request('GET', 'com.atproto.identity.resolveHandle', $args);  
+            return  $connection->request('GET', 'com.atproto.identity.resolveHandle', $args);
 
         }
 
@@ -438,14 +422,14 @@
         private function mark_hashtags($text) {
             // Regex to find and remove URLs
             preg_match_all(RegexPatterns::URL_REGEX, $text, $urlMatches, PREG_OFFSET_CAPTURE);
-        
+
             // Replace URLs in the text with placeholders of the same length
             $cleanText = $text;
             foreach ($urlMatches[0] as $urlMatch) {
                 $url = $urlMatch[0];
                 $start = $urlMatch[1];
                 $urlLength = strlen($url);
-        
+
                 // Replace URL with spaces to maintain position alignment
                 $cleanText = substr_replace($cleanText, str_repeat(' ', $urlLength), $start, $urlLength);
             }
@@ -480,14 +464,14 @@
 
             return $hashtagData;
         }
-        
+
         private function clean_hashtag($tag) {
             // Trim whitespace and remove trailing punctuation
             return preg_replace('/\p{P}+$/u', '', trim($tag));
         }
-                    
+
         private function fetch_link_card($connection, $url, $media = '') {
-            
+
             // The required fields for every embed card
             $card = [
                 "uri" => $url,
@@ -495,38 +479,38 @@
                 "description" => "",
                 "imageurlff" => $media,
             ];
-        
+
             // Create a new DOMDocument
             $agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
             ini_set('user_agent', $agent);
             $doc = new \DOMDocument();
-        
+
             // Suppress errors for invalid HTML, if needed
             libxml_use_internal_errors(true);
-        
+
             // Load the HTML from the URL
             if (!$doc->loadHTMLFile($url)){
                 throw new php2BlueskyException("Error loading url ".$url);
             }
-        
+
             // Restore error handling
             libxml_use_internal_errors(false);
-        
+
             // Create a new DOMXPath object for querying the document
             $xpath = new \DOMXPath($doc);
-        
+
             // Query for "og:title" and "og:description" meta tags
             $title_tag = $xpath->query('//meta[@property="og:title"]/@content');
             if ($title_tag->length > 0) {
                 $card["title"] = $title_tag[0]->nodeValue;
             }
-        
+
             // If there is an "og:description" meta tag, use that as the description
             $description_tag = $xpath->query('//meta[@property="og:description"]/@content');
             if ($description_tag->length > 0) {
                 $card["description"] = $description_tag[0]->nodeValue;
             }
-        
+
             // If there is an "og:image" meta tag, use that as the image
             if($card["imageurlff"] == "") {
                 // If there is an "og:image" meta tag, fetch and upload that image
@@ -567,7 +551,7 @@
                 $image = $result[0];
                 $imageInfo = $result[1];
             }
-        
+
             $embed = '';
             $embed = [
             'embed' => [
@@ -586,7 +570,7 @@
             ];
             return $embed;
         }
-        
+
         private function getFileName($path) {
             // If the path is a URL, use basename to get the filename
             if (filter_var($path, FILTER_VALIDATE_URL)) {
@@ -608,13 +592,13 @@
         private function extract_url_base($url) {
             // Decode the URL first to handle any encoded characters
             $decodedUrl = urldecode($url);
-        
+
             // Remove "https://" (case-insensitive)
             $decodedUrl = preg_replace('/^https?:\/\//i', '', $decodedUrl);
-        
+
             // Find the position of the first "?" (query parameters start here)
             $pos = strpos($decodedUrl, "?");
-            
+
             // Extract the base URL (everything before the "?")
             if ($pos !== false) {
                 $baseUrl = substr($decodedUrl, 0, $pos);
@@ -622,7 +606,7 @@
                 // If "?" is not found, take the entire decoded URL
                 $baseUrl = $decodedUrl;
             }
-        
+
             return $baseUrl;
         }
 
@@ -633,7 +617,7 @@
 
             // Split the response header into individual lines
             $lines = explode("\n", $responseHeader);
-            
+
             // Initialize an array to store the RateLimit fields
             $rateLimit = [];
             foreach ($lines as $line) {
@@ -646,15 +630,15 @@
                     $rateLimit['Reset'] = trim(explode(':', $line, 2)[1]);
                 }
             }
-            
+
             // Convert RateLimit-Reset to human-readable format
             if (isset($rateLimit['Reset'])) {
                 $rateLimit['Reset_Human'] = date('Y-m-d H:i:s', $rateLimit['Reset']);
             }
-            
+
             return $rateLimit;
         }
 
     }
-        
+
 ?>

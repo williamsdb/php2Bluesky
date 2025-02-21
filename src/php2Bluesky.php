@@ -14,10 +14,7 @@
     use williamsdb\php2bluesky\BlueskyConsts;
     use williamsdb\php2bluesky\php2BlueskyException;
     use williamsdb\php2bluesky\RegexPatterns;
-    use williamsdb\php2bluesky\Version; // Non utilisé
-
-
-
+    use williamsdb\php2bluesky\Version; // Non utilised, for documentation only
 
     /**
      * Class for building array to send to Bluesky API

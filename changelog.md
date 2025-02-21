@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.13] - 2025-02-21
+### Removed
+- removed the files section from the autoload to remove reference to previous functions.php file
+
+## [2.0.12] - 2025-02-21
+### Added
+- changes to comply with psr-4 - thanks to @japafrite for the changes
+
 ## [2.0.11] - 2025-02-02
 ### Added
 - added code to trap when a specified fallback image doesn't exist

@@ -1,5 +1,7 @@
 <?php
 
+namespace williamsdb\php2bluesky;
+
 class RegexPatterns
 {
     const MENTION_REGEX = '/[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/u';

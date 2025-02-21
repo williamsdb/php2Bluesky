@@ -1,5 +1,7 @@
 <?php
 
+namespace williamsdb\php2bluesky;
+
 class BlueskyConsts
 {
     // don't change these unless Bluesky changes the limits

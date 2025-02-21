@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.11] - 2025-02-02
+### Added
+- added code to trap when a specified fallback image doesn't exist
+
+## [2.0.10] - 2025-02-02
+### Added
+- new fallback option, URL=, that allows you to specify an image to use on fallback
+
+## [2.0.9] - 2025-01-31
+### Added
+- change to handling of files that cannot be read & header response function
+
 ## [2.0.8] - 2025-01-22
 ### Added
 - fixed a bug in fallback override and another in getting link card images

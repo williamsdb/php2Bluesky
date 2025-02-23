@@ -111,7 +111,7 @@ Note: connection to the Bluesky API is made via Clark Rasmussen's [BlueskyApi](h
 
 *  Setup and connect to Bluesky:
 
-```
+```php
 require __DIR__ . '/vendor/autoload.php';
 
 use williamsdb\php2bluesky\php2Bluesky;
@@ -127,7 +127,7 @@ $connection = $php2Bluesky->bluesky_connect($handle, $password);
 
 * Sending text with tags
 
-```
+```php
 $text = "This is some text with a #hashtag.";
 
 $response = $php2Bluesky->post_to_bluesky($connection, $text);
@@ -140,7 +140,7 @@ if (!isset($response->error)){
 
 * Uploading a post with a single image and embedded url
 
-```
+```php
 $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
 $text = 'Screenshot of Bluesky';
 $alt = 'This is the screenshot that Wikipedia uses for their https://en.wikipedia.org/wiki/Bluesky entry.';
@@ -155,7 +155,7 @@ if (!isset($response->error)){
 
 * Uploading a post with multiple images (both local and remote)
 
-````
+````php
 $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
 $filename2 = '/Users/neilthompson/Development/php2Bluesky/Screenshot1.png';
 $filename3 = 'https://www.spokenlikeageek.com/wp-content/uploads/2024/11/2024-11-18-19-28-59.png';
@@ -176,7 +176,7 @@ if (!isset($response->error)){
 
 * Sending parameters when connecting to override defaults
 
-````
+````php
 $php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
                                $failOverMaxPostSize = FALSE, 
                                $randomImageURL = 'https://picsum.photos/1024/536',

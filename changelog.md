@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.14] - 2025-02-21
+### Added
+- included namespace to fix loading issues
+
 ## [2.0.13] - 2025-02-21
 ### Removed
 - removed the files section from the autoload to remove reference to previous functions.php file

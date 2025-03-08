@@ -477,18 +477,32 @@
                 "imageurlff" => $media,
             ];
 
+            $opts = [
+                "http" => [
+                    "user_agent" => "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                ]
+            ];
+            $context = stream_context_create($opts);
+
+            $html = file_get_contents($url, false, $context);
+
+            if (false===$html) {
+                throw new php2BlueskyException("Error loading url ".$url);
+            }
+
+            // there are charset issues with HTML5 documents using short charset declaration syntax
+            // e.g. <meta charset="..."> instead of <meta http-equiv="Content-Type" content="text/html; charset=...">
+            // hence replace the charset declaration to legacy HTML4 before loading everything into DOMDocument
+            $html = preg_replace('/<meta[^>]+charset=(.)([a-z0-9-]+)\1[^>]*>/imU', '<meta http-equiv="Content-Type" content="text/html; charset=$2">', $html);
+
             // Create a new DOMDocument
-            $agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
-            ini_set('user_agent', $agent);
             $doc = new \DOMDocument();
 
             // Suppress errors for invalid HTML, if needed
             libxml_use_internal_errors(true);
 
-            // Load the HTML from the URL
-            if (!$doc->loadHTMLFile($url)){
-                throw new php2BlueskyException("Error loading url ".$url);
-            }
+            // Load the HTML from the string
+            $doc->loadHTML($html);
 
             // Restore error handling
             libxml_use_internal_errors(false);
@@ -549,21 +563,20 @@
                 $imageInfo = $result[1];
             }
 
-            $embed = '';
             $embed = [
-            'embed' => [
-                '$type' => 'app.bsky.embed.external',
-                'external' => [
-                    'uri' => $card['uri'],
-                    'title' => $card['title'],
-                    'description' => $card['description'],
-                    'thumb' => $image,
-                    'aspectRatio' => [
-                        'width' => $imageInfo[0],
-                        'height' => $imageInfo[1]
-                    ]
+                'embed' => [
+                    '$type' => 'app.bsky.embed.external',
+                    'external' => [
+                        'uri' => $card['uri'],
+                        'title' => $card['title'],
+                        'description' => $card['description'],
+                        'thumb' => $image,
+                        'aspectRatio' => [
+                            'width' => $imageInfo[0],
+                            'height' => $imageInfo[1]
+                        ]
+                    ],
                 ],
-            ],
             ];
             return $embed;
         }

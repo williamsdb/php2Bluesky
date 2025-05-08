@@ -92,7 +92,10 @@ Requirements are very simple, it requires the following:
 
 1. PHP (I tested on v8.1.13) - requires php-dom and php-gd
 2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
-2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that).
+2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
+3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos.
+
+Read more about the [requirements for video upload here](https://www.spokenlikeageek.com/2025/05/10/uploading-videos-with-php2bluesky/).
 
 ### Installation
 
@@ -173,6 +176,20 @@ if (!isset($response->error)){
     echo $url.PHP_EOL;            
 }
 ```` 
+
+* Uploading a post with a single video
+
+```php
+$filename1 = '/path/to/local/video.mp4';
+$text = 'A beautiful video';
+
+$response = $php2Bluesky->post_to_bluesky($connection, $text, $filename1);
+print_r($response);
+if (!isset($response->error)){
+    $url = $php2Bluesky->permalink_from_response($response, $handle);
+    echo $url.PHP_EOL;            
+}
+```
 
 * Sending parameters when connecting to override defaults
 

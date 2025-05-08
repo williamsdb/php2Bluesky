@@ -171,9 +171,6 @@ class php2Bluesky
         } elseif (strpos($mime, 'video') !== false) {
             // get the image dimensions
             $imageInfo = $this->getvideosize($filename);
-            if ($imageInfo === FALSE) {
-                throw new php2BlueskyException("Could not get the size of the image.", 1004);
-            }
 
             // upload the file to Bluesky
             $response = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
@@ -316,16 +313,25 @@ class php2Bluesky
 
                 // check if the media is a video
                 if (strpos($response->mimeType, 'video') !== false) {
-                    $embed = [
-                        'embed' => [
-                            '$type' => 'app.bsky.embed.video',
-                            'video' => $response,
-                            'aspectRatio' => [
-                                'width' => $imageInfo[0],
-                                'height' => $imageInfo[1]
-                            ]
-                        ],
-                    ];
+                    if (empty($imageInfo)) {
+                        $embed = [
+                            'embed' => [
+                                '$type' => 'app.bsky.embed.video',
+                                'video' => $response
+                            ],
+                        ];
+                    } else {
+                        $embed = [
+                            'embed' => [
+                                '$type' => 'app.bsky.embed.video',
+                                'video' => $response,
+                                'aspectRatio' => [
+                                    'width' => $imageInfo[0],
+                                    'height' => $imageInfo[1]
+                                ]
+                            ],
+                        ];
+                    }
                 } else {
                     // has an array been passed?
                     if (is_array($alt)) {
@@ -663,7 +669,7 @@ class php2Bluesky
                 $checkCmd = 'command -v ffprobe';
             }
 
-            $ffprobeGlobal = trim(shell_exec($checkCmd));
+            $ffprobeGlobal = trim(shell_exec($checkCmd) ?? '');
 
             if ($ffprobeGlobal) {
                 // On Windows, 'where' can return multiple paths; take the first one
@@ -673,7 +679,7 @@ class php2Bluesky
 
         // If ffprobe is not found in the local directory or globally, throw an exception
         if (!$ffprobePath) {
-            throw new php2BlueskyException("ffprobe is not available. Please install.", 1008);
+            return [];
         }
 
         // Run ffprobe to get JSON output

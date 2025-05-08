@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1] - 2025-05-08
+
+### Update
+
+- removed the requirement for ffprobe so code will run with or without it
+
 ## [2.1.0] - 2025-05-07
 
 ### Added
@@ -98,7 +104,7 @@
 
 - Moved to composer rather than including file
 - Change the way images are uploaded so that now only a call to post_to_bluesky is required
-- Pass the dimensions to Bluesky for images so that they are displayed correctly.
+- Pass the dimensions to Bluesky for images so that they are displayed correctly
 
 ## [1.0.0] - 2025-01-03
 

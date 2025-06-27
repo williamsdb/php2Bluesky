@@ -22,4 +22,10 @@ class BlueskyConsts
         'video/webm',
         'video/mov',
     ];
+    const ALLOWED_LABELS = [
+        'porn',
+        'sexual',
+        'nudity',
+        'graphic-media'
+    ];
 }

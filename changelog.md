@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0] - 2025-06-27
+
+### Added
+
+- ability to include moderation labels with media uploads
+
 ## [2.1.1] - 2025-05-08
 
 ### Update

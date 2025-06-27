@@ -185,10 +185,10 @@ class php2Bluesky
         return [$image, $imageInfo];
     }
 
-    public function post_to_bluesky($connection, $text, $media = '', $link = '', $alt = '', $linkCardFallback = 'UNSET')
+    public function post_to_bluesky($connection, $text, $media = '', $link = '', $alt = '', $labels = '', $linkCardFallback = 'UNSET')
     {
 
-        // if set overrider the default setting for link card fallback for this post
+        // if set override the default setting for link card fallback for this post
         if ($linkCardFallback != 'UNSET') {
             $this->linkCardFallback = $linkCardFallback;
         }
@@ -270,6 +270,28 @@ class php2Bluesky
             'facets' =>
             $facets,
         ];
+
+        // check for labels
+        $labelArray = [];
+
+        if (!empty($labels)) {
+            // Expect string or array
+            $singleLabels = is_array($labels) ? $labels : [$labels];
+            foreach ($singleLabels as $label) {
+                if (!in_array($label, BlueskyConsts::ALLOWED_LABELS, true)) {
+                    throw new php2BlueskyException("Unsupported label: '$label'");
+                }
+                $labelArray[] = ['val' => $label];
+            }
+
+            // add the labels to the facets
+            $label = [
+                'labels' => [
+                    '$type' => 'com.atproto.label.defs#selfLabels',
+                    'values' => $labelArray,
+                ],
+            ];
+        }
 
         // add any media - will accept multiple images in an array or a single image/video as a string
         $embed = '';
@@ -376,6 +398,7 @@ class php2Bluesky
                 '$type' => 'app.bsky.feed.post',
             ],
         ];
+        if (!empty($label)) $embed = array_merge($embed, $label);
         if (!empty($embed)) $args['record'] = array_merge($args['record'], $embed);
         if (!empty($facets)) $args['record'] = array_merge($args['record'], $facets);
 

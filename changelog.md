@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1] - 2025-06-27
+
+### Update
+
+- included the !no-unauthenticated label in the list of valid labels
+
 ## [2.2.0] - 2025-06-27
 
 ### Added

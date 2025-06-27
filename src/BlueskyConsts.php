@@ -26,6 +26,7 @@ class BlueskyConsts
         'porn',
         'sexual',
         'nudity',
-        'graphic-media'
+        'graphic-media',
+        '!no-unauthenticated'
     ];
 }

@@ -93,7 +93,7 @@ Requirements are very simple, it requires the following:
 1. PHP (I tested on v8.1.13) - requires php-dom and php-gd
 2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
 2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
-3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos.
+3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos (optional).
 
 Read more about the [requirements for video upload here](https://www.spokenlikeageek.com/2025/05/10/uploading-videos-with-php2bluesky/).
 
@@ -199,6 +199,28 @@ $php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM',
                                $randomImageURL = 'https://picsum.photos/1024/536',
                                $fileUploadDir='/tmp');
 ````
+
+* adding labels
+
+````php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
+                                          text: $text = "this is the text of your post", 
+                                          media: $media = "https://www.spokenlikeageek.com/wp-content/uploads/2025/06/SCR-20250628-jzfa.png", 
+                                          link: $link = '', 
+                                          alt: $alt = "Image of labels applied to a Bluesky post",
+                                          labels: $labels = ["!no-unauthenticated", "porn", "sexual"]);
+
+````
+
+
+| Label Value         | UI Label      | Explanation                      |
+|---------------------|---------------|----------------------------------|
+| porn                | Adult         | Explicit/erotic sexual content   |
+| sexual              | Suggestive    | Mild or suggestive sexual themes |
+| nudity              | Nudity        | Non‑erotic or artistic nudity    |
+| graphic-media       | Graphic Media | Violent or graphic content       |
+| !no-unauthenticated | n/a           | makes the content inaccessible to logged-out users in applications which respect the label.      |
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

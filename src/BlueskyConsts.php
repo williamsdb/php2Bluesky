@@ -17,6 +17,7 @@ class BlueskyConsts
         'image/png',
         'image/gif',
         'image/jpg',
+        'image/webp',
         'video/mp4',
         'video/mpeg',
         'video/webm',

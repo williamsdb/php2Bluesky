@@ -52,131 +52,111 @@ class php2Bluesky
 
     private function upload_media_to_bluesky($connection, $filename, $fileUploadDir = '/tmp')
     {
+        // helper: fetch remote file with cURL
+        $fetchRemote = function ($url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS      => 5,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER         => false,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_USERAGENT      => 'php2Bluesky/2.0',
+            ]);
+            $body = curl_exec($ch);
+            $mime = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            $err  = curl_error($ch);
+            curl_close($ch);
+
+            if ($body === false) {
+                throw new php2BlueskyException("Failed to fetch remote file: " . $err, 1005);
+            }
+
+            return [$body, $mime];
+        };
 
         // have we been passed a file?
         if (empty($filename)) return;
 
-        // get the file mime type
+        // get mime type and file body
         if (filter_var($filename, FILTER_VALIDATE_URL)) {
-            // can we access the file?
-            $context = stream_context_create(['http' => ['ignore_errors' => true]]);
-            if (@file_get_contents($filename, false, $context) !== false) {
-                if ($headers = get_headers($filename, 1)) {
-                    if ($headers = get_headers($filename, 1)) {
-                        if (isset($headers['Content-Type'])) {
-                            $mime = $headers['Content-Type'];
-                        } elseif (isset($headers['content-type'])) {
-                            $mime = $headers['content-type'];
-                        } else {
-                            $mime = '';
-                        }
-                    } else {
-                        $mime = '';
-                    }
-                }
-            } else {
-                $mime = '';
-            }
+            [$body, $mime] = $fetchRemote($filename);
         } else {
+            if (!file_exists($filename)) {
+                throw new php2BlueskyException("Local file does not exist: " . $filename, 1006);
+            }
             $mime = mime_content_type($filename);
+            $body = file_get_contents($filename);
         }
 
         // if we can't determine the mime type, use the fallback
-        if (empty($mime) || !isset($mime) || !is_string($mime)) {
+        if (empty($mime) || !is_string($mime)) {
             if (strtoupper($this->linkCardFallback) == 'RANDOM') {
                 $filename = $this->randomImageURL;
+                [$body, $mime] = $fetchRemote($filename);
             } elseif (strtoupper($this->linkCardFallback) == 'BLANK') {
                 if (file_exists(__DIR__ . '/blank.png')) {
                     $filename = __DIR__ . '/blank.png';
+                    $mime     = mime_content_type($filename);
+                    $body     = file_get_contents($filename);
                 } else {
                     throw new php2BlueskyException("BLANK specified for fallback image but blank.png is missing.", 1001);
                 }
             } elseif (strtoupper(substr($this->linkCardFallback, 0, 3)) == 'URL') {
                 $filename = substr($this->linkCardFallback, 4);
+                [$body, $mime] = $fetchRemote($filename);
             } else {
-                throw new php2BlueskyException("Could not determine mime type of file.", 1002);
-            }
-
-            // get the mime type of the fallback image
-            if (filter_var($filename, FILTER_VALIDATE_URL)) {
-                if (@file_get_contents($filename, false, $context) !== false) {
-                    if ($headers = get_headers($filename, 1)) {
-                        if ($headers = get_headers($filename, 1)) {
-                            if (isset($headers['Content-Type'])) {
-                                $mime = $headers['Content-Type'];
-                            } elseif (isset($headers['content-type'])) {
-                                $mime = $headers['content-type'];
-                            } else {
-                                $mime = '';
-                            }
-                        } else {
-                            $mime = '';
-                        }
-                    }
-                } else {
-                    $mime = '';
-                }
-            } else {
-                $mime = mime_content_type($filename);
-            }
-
-            // if we can't determine the mime type of the fallback, error
-            if (empty($mime) || !isset($mime) || !is_string($mime)) {
                 throw new php2BlueskyException("Could not determine mime type of file.", 1002);
             }
         }
+
         // what file type have we got?
         if (!in_array($mime, BlueskyConsts::FILE_TYPES)) {
             throw new php2BlueskyException("File type not supported: " . $mime, 1003);
         }
 
         // get the size and basename of the file
-        $body = file_get_contents($filename);
         $basename = $this->getFileName($filename);
-        $size = strlen($body);
+        $size     = strlen($body);
 
         // is the file image or video?
         if (strpos($mime, 'image') !== false) {
-            // does the file size need reducing?
+            // does the file size need reducing? (applies to local + remote)
             if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
                 $newImage = imagecreatefromstring($body);
-                // downsample the image until it is less than maxImageSize (if possible!)
-                for ($i = 9; $i >= 1; $i--) {
-
-                    imagejpeg($newImage, $fileUploadDir . '/' . $basename, $i * 10);
-                    $size = strlen(file_get_contents($fileUploadDir . '/' . $basename));
-
-                    if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
-                        break;
-                    } else {
-                        unlink($fileUploadDir . '/' . $basename);
-                    }
+                if ($newImage === false) {
+                    throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
                 }
 
-                $body = file_get_contents($fileUploadDir . '/' . $basename);
-                unlink($fileUploadDir . '/' . $basename);
+                for ($i = 9; $i >= 1; $i--) {
+                    $tempFile = $fileUploadDir . '/' . $basename;
+                    imagejpeg($newImage, $tempFile, $i * 10);
+                    $size = filesize($tempFile);
+
+                    if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                        $body = file_get_contents($tempFile);
+                        unlink($tempFile);
+                        break;
+                    } else {
+                        unlink($tempFile);
+                    }
+                }
+                imagedestroy($newImage);
             }
 
             // upload the file to Bluesky
             $response = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
-
-            // return the image blob
-            $image = $response->blob;
+            $image    = $response->blob;
 
             // get the image dimensions
-            $imageInfo = getimagesize($filename);
-            if ($imageInfo === FALSE) {
+            $imageInfo = getimagesizefromstring($body);
+            if ($imageInfo === false) {
                 throw new php2BlueskyException("Could not get the size of the image.", 1004);
             }
         } elseif (strpos($mime, 'video') !== false) {
-            // get the image dimensions
             $imageInfo = $this->getvideosize($filename);
-
-            // upload the file to Bluesky
-            $response = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
-
-            // return the image blob
-            $image = $response->blob;
+            $response  = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
+            $image     = $response->blob;
         } else {
             throw new php2BlueskyException("File type not supported: " . $mime, 1003);
         }

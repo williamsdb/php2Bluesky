@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0] - 2025-09-09
+
+### Update
+
+- rewrote code for handling image uploads including following 301 redirects for linkcard fallbacks
+
+## [2.2.2] - 2025-09-01
+
+### Update
+
+- added support for webp images
+
 ## [2.2.1] - 2025-06-27
 
 ### Update

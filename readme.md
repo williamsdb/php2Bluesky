@@ -69,7 +69,7 @@ I needed a way to post to Bluesky from PHP and so I searched for a library to he
 <!-- GETTING STARTED -->
 ## Getting Started
 
-***NOTE*** This is for v2 of php2Bluesky. If you are looking for the v1 details you can find that [here](https://github.com/williamsdb/php2Bluesky/blob/8b137617bda0bd9dd97462966a8d9404e08ea807/readme.md). 
+***NOTE:*** This is for v2 of php2Bluesky. If you are looking for the v1 details you can find that [here](https://github.com/williamsdb/php2Bluesky/blob/8b137617bda0bd9dd97462966a8d9404e08ea807/readme.md). 
 
 Running the script is very straightforward:
 
@@ -112,7 +112,7 @@ Here's a few examples to get you started.
 
 Note: connection to the Bluesky API is made via Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) which this makes a connection to Bluesky and manages tokens etc. See [here](https://github.com/cjrasmussen/BlueskyApi) for more details.
 
-*  Setup and connect to Bluesky:
+###  Setup and connect to Bluesky
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
@@ -128,7 +128,34 @@ $password = 'abcd-efgh-ijkl-mnop';
 $connection = $php2Bluesky->bluesky_connect($handle, $password);
 ```
 
-* Sending text with tags
+#### Overriding the defaults
+
+When you instantiate php2Bluesky a number of defaults are set as shown in the table below. However, you can override these as follows:
+
+```php
+require __DIR__ . '/vendor/autoload.php';
+
+use williamsdb\php2bluesky\php2Bluesky;
+
+$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', $failOverMaxPostSize = TRUE);
+
+$handle = 'yourhandle.bsky.social';
+$password = 'abcd-efgh-ijkl-mnop';
+    
+// connect to Bluesky API
+$connection = $php2Bluesky->bluesky_connect($handle, $password);
+```
+See details below on how to set these.
+
+| Name                | Default values                   | Explanation                      |
+|---------------------|----------------------------------|----------------------------------|
+| $linkCardFallback   | 'BLANK'                          | What should happen if a linkcard doesn't have any associated image.<br> <br>Possibe values:<br> <br>RANDOM - a random image taken from $randomImageURL<br>BLANK - a blank image<br>ERROR - throw an error<br>URL - the image at this location, URL=https://...   |
+| $failOverMaxPostSize| FALSE                            | Throw an error if the text is longer than the allowed length of a post. |
+| $randomImageURL     | 'https://picsum.photos/1024/536' | Where to source the random image. Use with $linkCardFallback above.       |
+| $fileUploadDir      | '/tmp'                           | Where to upload images to before posting them. Make sure that the process has permissions to write here.       |
+| $defaultLang        | ['en']                           | The default languages of posts. This must be specified as an array.      |
+
+### Sending text with tags
 
 ```php
 $text = "This is some text with a #hashtag.";
@@ -141,7 +168,7 @@ if (!isset($response->error)){
 }
 ```
 
-* Uploading a post with a single image and embedded url
+### Uploading a post with a single image and embedded url
 
 ```php
 $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
@@ -156,7 +183,7 @@ if (!isset($response->error)){
 }
 ```
 
-* Uploading a post with multiple images (both local and remote)
+### Uploading a post with multiple images (both local and remote)
 
 ````php
 $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
@@ -177,7 +204,7 @@ if (!isset($response->error)){
 }
 ```` 
 
-* Uploading a post with a single video
+### Uploading a post with a single video
 
 ```php
 $filename1 = '/path/to/local/video.mp4';
@@ -191,7 +218,7 @@ if (!isset($response->error)){
 }
 ```
 
-* Sending parameters when connecting to override defaults
+### Sending parameters when connecting to override defaults
 
 ````php
 $php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
@@ -200,7 +227,9 @@ $php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM',
                                $fileUploadDir='/tmp');
 ````
 
-* adding labels
+### Adding labels
+
+Bluesky allows certain lables to be applied to posts to indicate whether they include any graphic content. There is a table below of what labels are supported but also see [BlueskyConsts.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/BlueskyConsts.php) for the latest.
 
 ````php
 $response = $php2Bluesky->post_to_bluesky(connection: $connection, 
@@ -220,6 +249,35 @@ $response = $php2Bluesky->post_to_bluesky(connection: $connection,
 | nudity              | Nudity        | Non‑erotic or artistic nudity    |
 | graphic-media       | Graphic Media | Violent or graphic content       |
 | !no-unauthenticated | n/a           | makes the content inaccessible to logged-out users in applications which respect the label.      |
+
+
+### Setting the language
+
+By default the language of your posts is set to English but you can override this in one of two ways. Either specify the langauge when creating the instance of php2Bluesky (see above) or pass it when posting. It must be an array even if you are passing a single language.
+
+````php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
+                                          text: $text = "Bonjour le monde!", 
+                                          media: $media = "", 
+                                          link: $link = "", 
+                                          alt: $alt = "",
+                                          labels: $labels = ""
+                                          lang: $lang = ["fr"]);
+
+````
+
+It is also possible to pass multiple languages as follows:
+
+````php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
+                                          text: $text = "Bonjour le monde!".PHP_EOL."Hello World!", 
+                                          media: $media = "", 
+                                          link: $link = "", 
+                                          alt: $alt = "",
+                                          labels: $labels = ""
+                                          lang: $lang = ["fr", "en-GB"]);
+
+````
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

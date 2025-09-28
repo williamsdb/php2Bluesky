@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.1] - 2025-09-28
+
+### Update
+
+- added ability to state post language where previously it was hard coded as English
+
 ## [2.3.0] - 2025-09-09
 
 ### Update

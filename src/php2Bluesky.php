@@ -35,12 +35,16 @@ class php2Bluesky
     // folder to use for temporary files
     private string $fileUploadDir;
 
-    public function __construct($linkCardFallback = 'BLANK', $failOverMaxPostSize = FALSE, $randomImageURL = 'https://picsum.photos/1024/536', $fileUploadDir = '/tmp')
+    // default language for posts
+    private array $defaultLang;
+
+    public function __construct($linkCardFallback = 'BLANK', $failOverMaxPostSize = FALSE, $randomImageURL = 'https://picsum.photos/1024/536', $fileUploadDir = '/tmp', $defaultLang = ['en'])
     {
         $this->linkCardFallback = $linkCardFallback;
         $this->failOverMaxPostSize = $failOverMaxPostSize;
         $this->randomImageURL = $randomImageURL;
         $this->fileUploadDir = $fileUploadDir;
+        $this->defaultLang = $defaultLang;
     }
 
     public function bluesky_connect($handle, $password)
@@ -165,7 +169,7 @@ class php2Bluesky
         return [$image, $imageInfo];
     }
 
-    public function post_to_bluesky($connection, $text, $media = '', $link = '', $alt = '', $labels = '', $linkCardFallback = 'UNSET')
+    public function post_to_bluesky($connection, $text, $media = '', $link = '', $alt = '', $labels = '', $linkCardFallback = 'UNSET', $lang = '')
     {
 
         // if set override the default setting for link card fallback for this post
@@ -367,13 +371,18 @@ class php2Bluesky
             $embed = $this->fetch_link_card($connection, $link, $media);
         }
 
+        // if a language has been specified, use it, otherwise use the default
+        if (empty($lang)) {
+            $lang = $this->defaultLang;
+        }
+
         // build the final arguments
         $args = [
             'collection' => 'app.bsky.feed.post',
             'repo' => $connection->getAccountDid(),
             'record' => [
                 'text' => $text,
-                'langs' => ['en'],
+                'langs' => $lang,
                 'createdAt' => date('c'),
                 '$type' => 'app.bsky.feed.post',
             ],

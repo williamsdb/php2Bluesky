@@ -132,19 +132,14 @@ $connection = $php2Bluesky->bluesky_connect($handle, $password);
 
 When you instantiate php2Bluesky a number of defaults are set as shown in the table below. However, you can override these as follows:
 
-```php
-require __DIR__ . '/vendor/autoload.php';
+````php
+$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
+                               $failOverMaxPostSize = FALSE, 
+                               $randomImageURL = 'https://picsum.photos/1024/536',
+                               $fileUploadDir='/tmp'
+                               $defaultLang = ['fr']);
+````
 
-use williamsdb\php2bluesky\php2Bluesky;
-
-$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', $failOverMaxPostSize = TRUE);
-
-$handle = 'yourhandle.bsky.social';
-$password = 'abcd-efgh-ijkl-mnop';
-    
-// connect to Bluesky API
-$connection = $php2Bluesky->bluesky_connect($handle, $password);
-```
 See details below on how to set these.
 
 | Name                | Default values                   | Explanation                      |
@@ -217,15 +212,6 @@ if (!isset($response->error)){
     echo $url.PHP_EOL;            
 }
 ```
-
-### Sending parameters when connecting to override defaults
-
-````php
-$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
-                               $failOverMaxPostSize = FALSE, 
-                               $randomImageURL = 'https://picsum.photos/1024/536',
-                               $fileUploadDir='/tmp');
-````
 
 ### Adding labels
 

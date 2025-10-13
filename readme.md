@@ -136,7 +136,7 @@ When you instantiate php2Bluesky a number of defaults are set as shown in the ta
 $php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
                                $failOverMaxPostSize = FALSE, 
                                $randomImageURL = 'https://picsum.photos/1024/536',
-                               $fileUploadDir='/tmp'
+                               $fileUploadDir='/tmp',
                                $defaultLang = ['fr']);
 ````
 
@@ -247,7 +247,7 @@ $response = $php2Bluesky->post_to_bluesky(connection: $connection,
                                           media: $media = "", 
                                           link: $link = "", 
                                           alt: $alt = "",
-                                          labels: $labels = ""
+                                          labels: $labels = "",
                                           lang: $lang = ["fr"]);
 
 ````

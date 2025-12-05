@@ -116,7 +116,7 @@ class php2Bluesky
 
         // what file type have we got?
         if (!in_array($mime, BlueskyConsts::FILE_TYPES)) {
-            throw new php2BlueskyException("File type not supported: " . $mime, 1003);
+            throw new php2BlueskyException("File type not supported: " . $mime . " - $filename", 1003);
         }
 
         // get the size and basename of the file

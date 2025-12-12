@@ -65,12 +65,12 @@ class php2Bluesky
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER         => false,
                 CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_USERAGENT      => 'php2Bluesky/2.0',
+                CURLOPT_USERAGENT => "Mozilla/5.0",
             ]);
             $body = curl_exec($ch);
             $mime = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
             $err  = curl_error($ch);
-            curl_close($ch);
+            unset($ch);
 
             if ($body === false) {
                 throw new php2BlueskyException("Failed to fetch remote file: " . $err, 1005);
@@ -114,9 +114,14 @@ class php2Bluesky
             }
         }
 
+        // truncate mime type at semicolon if present
+        if (($pos = strpos($mime, ';')) !== false) {
+            $mime = substr($mime, 0, $pos);
+        }
+
         // what file type have we got?
         if (!in_array($mime, BlueskyConsts::FILE_TYPES)) {
-            throw new php2BlueskyException("File type not supported: " . $mime, 1003);
+            throw new php2BlueskyException("File type not supported: " . $mime . " - $filename", 1003);
         }
 
         // get the size and basename of the file
@@ -406,7 +411,7 @@ class php2Bluesky
         if (!empty($matches[1])) {
             return 'https://bsky.app/profile/' . $handle . '/post/' . $matches[1];
         } else {
-            echo "No post id found.";
+            throw new php2BlueskyException("No post id found. ", 1011);
         }
     }
 
@@ -548,14 +553,25 @@ class php2Bluesky
             "imageurlff" => $media,
         ];
 
-        $opts = [
-            "http" => [
-                "user_agent" => "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-            ]
-        ];
-        $context = stream_context_create($opts);
+        $ch = curl_init($url);
 
-        $html = file_get_contents($url, false, $context);
+        curl_setopt_array($ch, [
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 5,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => "Mozilla/5.0",
+        ]);
+        $response = curl_exec($ch);
+        $err  = curl_error($ch);
+        unset($ch);
+
+        if ($response === false) {
+            throw new php2BlueskyException("Failed to fetch remote file: " . $err  . " - $url", 1010);
+        }
+
+        $html = $response;
 
         if (false === $html) {
             throw new php2BlueskyException("Error loading url " . $url, 1006);

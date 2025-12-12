@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.2] - 2025-09-28
+
+### Update
+
+- moved from get_file_contents to cURL to support some edge cases
+- removed the last of the echo statements and replaced with throws
+- trucated the mime type if it had additonal information attached
+
 ## [2.3.1] - 2025-09-28
 
 ### Update

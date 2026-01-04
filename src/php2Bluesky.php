@@ -470,6 +470,7 @@ class php2Bluesky
 
     private function mark_urls($text)
     {
+        // First find URLs with protocols
         preg_match_all(RegexPatterns::URL_REGEX, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $urlData = array();
@@ -485,6 +486,42 @@ class php2Bluesky
                 'url' => $url,
             );
         }
+
+        // Then find URLs without protocols (starting with www. or common TLDs)
+        $noProtocolRegex = '/(?<!\S)(www\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(?:\/[^\s]*)?|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.(?:com|org|net|edu|gov|mil|int|co|uk|de|fr|jp|au|us|ru|ch|it|nl|se|no|es|mil)(?:\/[^\s]*)?)(?!\S)/i';
+
+        preg_match_all($noProtocolRegex, $text, $noProtocolMatches, PREG_OFFSET_CAPTURE);
+
+        foreach ($noProtocolMatches[0] as $match) {
+            $url = $match[0];
+            $start = $match[1];
+            $end = $start + strlen($url);
+
+            // Check if this URL overlaps with any already found protocol URLs
+            $overlap = false;
+            foreach ($urlData as $existingUrl) {
+                if ($start < $existingUrl['end'] && $end > $existingUrl['start']) {
+                    $overlap = true;
+                    break;
+                }
+            }
+
+            if (!$overlap) {
+                // Prepend https:// for URLs without protocol
+                $fullUrl = 'https://' . $url;
+
+                $urlData[] = array(
+                    'start' => $start,
+                    'end' => $end,
+                    'url' => $fullUrl,
+                );
+            }
+        }
+
+        // Sort by start position to maintain order
+        usort($urlData, function ($a, $b) {
+            return $a['start'] - $b['start'];
+        });
 
         return $urlData;
     }

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.3] - 2025-01-04
+
+### Update
+
+- detect urls that don't have any protocol (http/https), add the protocol and mark them so they are linked
+
 ## [2.3.2] - 2025-09-28
 
 ### Update

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.4] - 2025-03-25
+
+### Update
+
+- improved the handling of image selection on adding linkcards
+
 ## [2.3.3] - 2025-01-04
 
 ### Update

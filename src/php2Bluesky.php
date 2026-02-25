@@ -646,12 +646,25 @@ class php2Bluesky
             $card["description"] = $description_tag[0]->nodeValue;
         }
 
-        // If there is an "og:image" meta tag, use that as the image
+        // Check to see if there is a featured image that you can use (assumes WordPress)
         if ($card["imageurlff"] == "") {
+
             // If there is an "og:image" meta tag, fetch and upload that image
-            $image_tag = $xpath->query('//meta[@property="og:image"]/@content');
-            if ($image_tag->length > 0) {
-                $img_url = $image_tag[0]->nodeValue;
+            $image_tag = $xpath->query('//meta[@property="og:image"]/@content')->item(0);
+
+            // Fallback to the WordPress Featured Image class
+            if (!$image_tag) {
+                $image_tag = $xpath->query('//img[contains(@class, "wp-post-image")]/@src')->item(0);
+            }
+
+            // Fallback to the first image in the article body (Last resort)
+            if (!$image_tag) {
+                $image_tag = $xpath->query('//article//img/@src')->item(0);
+            }
+
+            $img_url = $image_tag ? $image_tag->nodeValue : null;
+
+            if (!empty($img_url)) {
                 // Naively turn a "relative" URL (just a path) into a full URL, if needed
                 if (!parse_url($img_url, PHP_URL_SCHEME)) {
                     $img_url = $url . $img_url;

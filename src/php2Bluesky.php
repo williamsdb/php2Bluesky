@@ -131,26 +131,31 @@ class php2Bluesky
         // is the file image or video?
         if (strpos($mime, 'image') !== false) {
             // does the file size need reducing? (applies to local + remote)
-            if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
-                $newImage = imagecreatefromstring($body);
-                if ($newImage === false) {
-                    throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
-                }
+            if ($mime != "image/gif") {
+                if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                    $newImage = imagecreatefromstring($body);
+                    if ($newImage === false) {
+                        throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
+                    }
 
-                for ($i = 9; $i >= 1; $i--) {
-                    $tempFile = $fileUploadDir . '/' . $basename;
-                    imagejpeg($newImage, $tempFile, $i * 10);
-                    $size = filesize($tempFile);
+                    for ($i = 9; $i >= 1; $i--) {
+                        $tempFile = $fileUploadDir . '/' . $basename;
+                        imagejpeg($newImage, $tempFile, $i * 10);
+                        $size = filesize($tempFile);
 
-                    if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
-                        $body = file_get_contents($tempFile);
-                        unlink($tempFile);
-                        break;
-                    } else {
-                        unlink($tempFile);
+                        if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                            $body = file_get_contents($tempFile);
+                            unlink($tempFile);
+                            break;
+                        } else {
+                            unlink($tempFile);
+                        }
                     }
                 }
-                imagedestroy($newImage);
+            } else {
+                if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                    throw new php2BlueskyException("GIF file size exceeds maximum upload size and cannot be resized.", 1008);
+                }
             }
 
             // upload the file to Bluesky
@@ -322,8 +327,11 @@ class php2Bluesky
                 $response = $result[0];
                 $imageInfo = $result[1];
 
-                // check if the media is a video
-                if (strpos($response->mimeType, 'video') !== false) {
+                // check if the media is a video or GIF and build the embed array accordingly
+                if (
+                    strpos($response->mimeType, 'video') !== false ||
+                    $response->mimeType === 'image/gif'
+                ) {
                     if (empty($imageInfo)) {
                         $embed = [
                             'embed' => [

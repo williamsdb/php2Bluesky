@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.5] - 2025-03-27
+
+### Update
+
+- fixed processing of gifs where previously only the first frame was showing
+
 ## [2.3.4] - 2025-03-25
 
 ### Update

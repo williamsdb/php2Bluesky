@@ -1,12 +1,18 @@
 # Changelog
 
-## [2.3.5] - 2025-03-27
+## [2.3.6] - 2025-03-1
+
+### Update
+
+- add the presentation key to mark gifs correctly
+
+## [2.3.5] - 2025-02-27
 
 ### Update
 
 - fixed processing of gifs where previously only the first frame was showing
 
-## [2.3.4] - 2025-03-25
+## [2.3.4] - 2025-02-25
 
 ### Update
 

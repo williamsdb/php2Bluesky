@@ -332,25 +332,30 @@ class php2Bluesky
                     strpos($response->mimeType, 'video') !== false ||
                     $response->mimeType === 'image/gif'
                 ) {
-                    if (empty($imageInfo)) {
-                        $embed = [
-                            'embed' => [
-                                '$type' => 'app.bsky.embed.video',
-                                'video' => $response
-                            ],
-                        ];
-                    } else {
-                        $embed = [
-                            'embed' => [
-                                '$type' => 'app.bsky.embed.video',
-                                'video' => $response,
-                                'aspectRatio' => [
-                                    'width' => $imageInfo[0],
-                                    'height' => $imageInfo[1]
-                                ]
-                            ],
+
+                    $isGif = ($response->mimeType === 'image/gif');
+
+                    $videoEmbed = [
+                        '$type' => 'app.bsky.embed.video',
+                        'video' => $response
+                    ];
+
+                    // Add aspect ratio if we have it
+                    if (!empty($imageInfo)) {
+                        $videoEmbed['aspectRatio'] = [
+                            'width'  => $imageInfo[0],
+                            'height' => $imageInfo[1]
                         ];
                     }
+
+                    // Add GIF presentation flag only for actual GIF uploads
+                    if ($isGif) {
+                        $videoEmbed['presentation'] = 'gif';
+                    }
+
+                    $embed = [
+                        'embed' => $videoEmbed,
+                    ];
                 } else {
                     // has an array been passed?
                     if (is_array($alt)) {

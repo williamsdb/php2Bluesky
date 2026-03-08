@@ -1,6 +1,12 @@
 # Changelog
 
-## [2.3.6] - 2025-03-1
+## [2.3.7] - 2025-03-08
+
+### Update
+
+- treat gifs as videos so they can have larger size
+
+## [2.3.6] - 2025-03-01
 
 ### Update
 

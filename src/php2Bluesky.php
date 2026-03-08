@@ -153,7 +153,7 @@ class php2Bluesky
                     }
                 }
             } else {
-                if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                if ($size > BlueskyConsts::MAX_VIDEO_UPLOAD_SIZE) {
                     throw new php2BlueskyException("GIF file size exceeds maximum upload size and cannot be resized.", 1008);
                 }
             }

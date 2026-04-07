@@ -94,6 +94,7 @@ Requirements are very simple, it requires the following:
 2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
 2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
 3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos (optional).
+3. [ffmpeg](https://ffmpeg.org/ffmpeg.html) if you intend to upload gifs (optional).
 
 Read more about the [requirements for video upload here](https://www.spokenlikeageek.com/2025/05/10/uploading-videos-with-php2bluesky/).
 

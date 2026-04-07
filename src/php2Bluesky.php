@@ -129,32 +129,26 @@ class php2Bluesky
         $size     = strlen($body);
 
         // is the file image or video?
-        if (strpos($mime, 'image') !== false) {
+        if (strpos($mime, 'image') !== false && $mime != "image/gif") {
             // does the file size need reducing? (applies to local + remote)
-            if ($mime != "image/gif") {
-                if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
-                    $newImage = imagecreatefromstring($body);
-                    if ($newImage === false) {
-                        throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
-                    }
-
-                    for ($i = 9; $i >= 1; $i--) {
-                        $tempFile = $fileUploadDir . '/' . $basename;
-                        imagejpeg($newImage, $tempFile, $i * 10);
-                        $size = filesize($tempFile);
-
-                        if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
-                            $body = file_get_contents($tempFile);
-                            unlink($tempFile);
-                            break;
-                        } else {
-                            unlink($tempFile);
-                        }
-                    }
+            if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                $newImage = imagecreatefromstring($body);
+                if ($newImage === false) {
+                    throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
                 }
-            } else {
-                if ($size > BlueskyConsts::MAX_VIDEO_UPLOAD_SIZE) {
-                    throw new php2BlueskyException("GIF file size exceeds maximum upload size and cannot be resized.", 1008);
+
+                for ($i = 9; $i >= 1; $i--) {
+                    $tempFile = $fileUploadDir . '/' . $basename;
+                    imagejpeg($newImage, $tempFile, $i * 10);
+                    $size = filesize($tempFile);
+
+                    if ($size < BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
+                        $body = file_get_contents($tempFile);
+                        unlink($tempFile);
+                        break;
+                    } else {
+                        unlink($tempFile);
+                    }
                 }
             }
 
@@ -167,8 +161,17 @@ class php2Bluesky
             if ($imageInfo === false) {
                 throw new php2BlueskyException("Could not get the size of the image.", 1004);
             }
-        } elseif (strpos($mime, 'video') !== false) {
-            $imageInfo = $this->getvideosize($filename);
+        } elseif (strpos($mime, 'video') !== false || $mime == "image/gif") {
+            if ($mime == "image/gif") {
+                $filename = $this->convertGifToVideo($filename, $this->fileUploadDir);
+                $body = file_get_contents($filename);
+                $imageInfo = $this->getvideosize($filename);
+                unlink($filename);
+                $mime = 'video/mp4';
+            } else {
+                $imageInfo = $this->getvideosize($filename);
+            }
+
             $response  = $connection->request('POST', 'com.atproto.repo.uploadBlob', [], $body, $mime);
             $image     = $response->blob;
         } else {
@@ -328,12 +331,7 @@ class php2Bluesky
                 $imageInfo = $result[1];
 
                 // check if the media is a video or GIF and build the embed array accordingly
-                if (
-                    strpos($response->mimeType, 'video') !== false ||
-                    $response->mimeType === 'image/gif'
-                ) {
-
-                    $isGif = ($response->mimeType === 'image/gif');
+                if (strpos($response->mimeType, 'video') !== false) {
 
                     $videoEmbed = [
                         '$type' => 'app.bsky.embed.video',
@@ -346,11 +344,6 @@ class php2Bluesky
                             'width'  => $imageInfo[0],
                             'height' => $imageInfo[1]
                         ];
-                    }
-
-                    // Add GIF presentation flag only for actual GIF uploads
-                    if ($isGif) {
-                        $videoEmbed['presentation'] = 'gif';
                     }
 
                     $embed = [
@@ -792,6 +785,50 @@ class php2Bluesky
                 }
             }
         }
+    }
+
+    // convert a GIF to a video file
+    private function convertGifToVideo($gifPath, $fileUploadDir = '/tmp')
+    {
+
+        $ffmpegPath = null;
+
+        // First check local directory
+        if (is_file('./ffmpeg') && is_executable('./ffmpeg')) {
+            $ffmpegPath = './ffmpeg';
+        } else {
+            // Check OS and look for ffmpeg globally
+            if (stripos(PHP_OS, 'WIN') === 0) {
+                $checkCmd = 'where ffmpeg';
+            } else {
+                $checkCmd = 'command -v ffmpeg';
+            }
+
+            $ffmpegGlobal = trim(shell_exec($checkCmd) ?? '');
+
+            if ($ffmpegGlobal) {
+                // On Windows, 'where' can return multiple paths; take the first one
+                $ffmpegPath = strtok($ffmpegGlobal, PHP_EOL);
+            }
+        }
+
+        // If ffmpeg is not found in the local directory or globally, throw an exception
+        if (!$ffmpegPath) {
+            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1010);
+        }
+
+        // get the basename of the file
+        $basename = $this->getFileName($gifPath);
+
+        // convert to video
+        $newTempFile = $fileUploadDir . '/' . pathinfo($basename, PATHINFO_FILENAME) . '.mp4';
+        $cmd = escapeshellcmd($ffmpegPath) . " -i " . escapeshellarg($gifPath) . " -movflags +faststart -pix_fmt yuv420p " . escapeshellarg($newTempFile) . " 2>&1";
+        $output = shell_exec($cmd);
+        if (!file_exists($newTempFile)) {
+            throw new php2BlueskyException("Failed to convert GIF to video. Ffmpeg output: " . $output, 1008);
+        }
+
+        return $newTempFile;
     }
 
     // check if the text is over the max post size

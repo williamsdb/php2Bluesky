@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.8] - 2025-04-07
+
+### Update
+
+- gifs are now converted to mp4 locally using ffmpeg before being uploaded
+
 ## [2.3.7] - 2025-03-08
 
 ### Update

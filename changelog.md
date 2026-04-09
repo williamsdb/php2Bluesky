@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.9] - 2025-04-09
+
+### Update
+
+- change to ffmpeg to handle more gifs
+- better error handling on ffmpeg and ffprobe
+- correct numbering of error numbers on throws
+
+### Added
+
+- table of error codes and messages thrown in php2Bluesky
+
 ## [2.3.8] - 2025-04-07
 
 ### Update

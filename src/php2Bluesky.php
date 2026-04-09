@@ -73,7 +73,7 @@ class php2Bluesky
             unset($ch);
 
             if ($body === false) {
-                throw new php2BlueskyException("Failed to fetch remote file: " . $err, 1005);
+                throw new php2BlueskyException("Failed to fetch remote file: " . $err, 1010);
             }
 
             return [$body, $mime];
@@ -87,7 +87,7 @@ class php2Bluesky
             [$body, $mime] = $fetchRemote($filename);
         } else {
             if (!file_exists($filename)) {
-                throw new php2BlueskyException("Local file does not exist: " . $filename, 1006);
+                throw new php2BlueskyException("Local file does not exist: " . $filename, 1013);
             }
             $mime = mime_content_type($filename);
             $body = file_get_contents($filename);
@@ -134,7 +134,7 @@ class php2Bluesky
             if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
                 $newImage = imagecreatefromstring($body);
                 if ($newImage === false) {
-                    throw new php2BlueskyException("Could not create image resource for resizing.", 1007);
+                    throw new php2BlueskyException("Could not create image resource for resizing.", 1014);
                 }
 
                 for ($i = 9; $i >= 1; $i--) {
@@ -276,7 +276,7 @@ class php2Bluesky
             $singleLabels = is_array($labels) ? $labels : [$labels];
             foreach ($singleLabels as $label) {
                 if (!in_array($label, BlueskyConsts::ALLOWED_LABELS, true)) {
-                    throw new php2BlueskyException("Unsupported label: '$label'");
+                    throw new php2BlueskyException("Unsupported label: '$label'", 1015);
                 }
                 $labelArray[] = ['val' => $label];
             }
@@ -417,7 +417,7 @@ class php2Bluesky
         if (!empty($matches[1])) {
             return 'https://bsky.app/profile/' . $handle . '/post/' . $matches[1];
         } else {
-            throw new php2BlueskyException("No post id found. ", 1011);
+            throw new php2BlueskyException("No post id found.", 1011);
         }
     }
 
@@ -617,7 +617,7 @@ class php2Bluesky
         $html = $response;
 
         if (false === $html) {
-            throw new php2BlueskyException("Error loading url " . $url, 1006);
+            throw new php2BlueskyException("Error loading url:" . $url, 1006);
         }
 
         // there are charset issues with HTML5 documents using short charset declaration syntax
@@ -763,24 +763,59 @@ class php2Bluesky
 
         // If ffprobe is not found in the local directory or globally, throw an exception
         if (!$ffprobePath) {
-            return [];
+            throw new php2BlueskyException("FFprobe not found in the local directory or globally.", 1022);
         }
 
         // Run ffprobe to get JSON output
         $cmd = escapeshellcmd($ffprobePath) . " -v quiet -print_format json -show_streams " . escapeshellarg($videoPath);
-        $output = shell_exec($cmd);
 
-        if ($output) {
-            $json = json_decode($output, true);
+        $output = [];
+        $returnCode = 0;
+
+        exec($cmd, $output, $returnCode);
+
+        // Check for errors
+        if ($returnCode !== 0) {
+            throw new php2BlueskyException(
+                "FFprobe failed (code $returnCode): " . implode("\n", $output),
+                1016
+            );
+        }
+
+        // Convert output array to string
+        $jsonString = implode("\n", $output);
+        $json = json_decode($jsonString, true);
+
+        // Validate JSON
+        if ($json === null) {
+            throw new php2BlueskyException(
+                "Failed to parse ffprobe JSON: " . $jsonString,
+                1017
+            );
+        }
+
+        // Extract video stream info
+        if (!empty($json['streams'])) {
             foreach ($json['streams'] as $stream) {
                 if ($stream['codec_type'] === 'video') {
                     $width = $stream['width'];
                     $height = $stream['height'];
-                    $duration = isset($stream['duration']) ? $stream['duration'] : $json['streams'][0]['duration'];
-                    // check if the duration is greater than the max
-                    if ($duration > BlueskyConsts::MAX_VIDEO_DURATION) {
-                        throw new php2BlueskyException("Video duration exceeds maximum allowed duration of " . BlueskyConsts::MAX_VIDEO_DURATION . " seconds.", 1009);
+
+                    $duration = $stream['duration']
+                        ?? $json['format']['duration']
+                        ?? null;
+
+                    if ($duration === null) {
+                        throw new php2BlueskyException("Unable to determine video duration.", 1018);
                     }
+
+                    if ($duration > BlueskyConsts::MAX_VIDEO_DURATION) {
+                        throw new php2BlueskyException(
+                            "Video duration exceeds maximum allowed duration of " . BlueskyConsts::MAX_VIDEO_DURATION . " seconds.",
+                            1009
+                        );
+                    }
+
                     return [$width, $height, $duration];
                 }
             }
@@ -814,7 +849,7 @@ class php2Bluesky
 
         // If ffmpeg is not found in the local directory or globally, throw an exception
         if (!$ffmpegPath) {
-            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1010);
+            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1019);
         }
 
         // get the basename of the file
@@ -822,10 +857,29 @@ class php2Bluesky
 
         // convert to video
         $newTempFile = $fileUploadDir . '/' . pathinfo($basename, PATHINFO_FILENAME) . '.mp4';
-        $cmd = escapeshellcmd($ffmpegPath) . " -i " . escapeshellarg($gifPath) . " -movflags +faststart -pix_fmt yuv420p " . escapeshellarg($newTempFile) . " 2>&1";
-        $output = shell_exec($cmd);
-        if (!file_exists($newTempFile)) {
-            throw new php2BlueskyException("Failed to convert GIF to video. Ffmpeg output: " . $output, 1008);
+        //        $cmd = escapeshellcmd($ffmpegPath) . " -i " . escapeshellarg($gifPath) . " -y -movflags +faststart -pix_fmt yuv420p " . escapeshellarg($newTempFile) . " 2>&1";
+        $cmd = escapeshellcmd($ffmpegPath) .
+            " -y -i " . escapeshellarg($gifPath) .
+            " -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" " .
+            " -movflags +faststart -pix_fmt yuv420p -vsync 2 " .
+            escapeshellarg($newTempFile) . " 2>&1";
+        $output = [];
+        $returnCode = 0;
+
+        exec($cmd, $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            throw new php2BlueskyException(
+                "FFmpeg failed (code $returnCode): " . implode("\n", $output),
+                1020
+            );
+        }
+
+        if (!file_exists($newTempFile) || filesize($newTempFile) === 0) {
+            throw new php2BlueskyException(
+                "Output file missing or empty. FFmpeg output: " . implode("\n", $output),
+                1021
+            );
         }
 
         return $newTempFile;

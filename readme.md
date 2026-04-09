@@ -93,8 +93,8 @@ Requirements are very simple, it requires the following:
 1. PHP (I tested on v8.1.13) - requires php-dom and php-gd
 2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
 2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
-3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos (optional).
-3. [ffmpeg](https://ffmpeg.org/ffmpeg.html) if you intend to upload gifs (optional).
+3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos or gifs (optional)
+3. [ffmpeg](https://ffmpeg.org/ffmpeg.html) if you intend to upload videos or gifs (optional).
 
 Read more about the [requirements for video upload here](https://www.spokenlikeageek.com/2025/05/10/uploading-videos-with-php2bluesky/).
 
@@ -266,6 +266,33 @@ $response = $php2Bluesky->post_to_bluesky(connection: $connection,
 
 ````
 
+### Error Codes
+
+List of error codes and messages that are thrown by php2Bluesky.
+
+| Message                                                                                         | Code |
+|-------------------------------------------------------------------------------------------------|------|
+| BLANK specified for fallback image but blank.png is missing.                                    | 1001 |
+| Could not determine mime type of file.                                                          | 1002 |
+| File type not supported: ```<mime type>```                                                  | 1003 |
+| Could not get the size of the image.                                                            | 1004 |
+| Provided text greater than ```<BlueskyConsts::MAX_POST_SIZE>```                                      | 1005 |
+| Error loading url: ```<url>```                                                                        | 1006 |
+| No suitable image found for link card.                                                          | 1007 |
+| Video duration exceeds maximum allowed duration of ```<BlueskyConsts::MAX_VIDEO_DURATION>``` seconds. | 1009 |
+| Failed to fetch remote file: ```<error>``` - ```<url>```                                                    | 1010 |
+| No post id found.                                                                               | 1011 |
+| UNUSED                                                                                          | 1012 |
+| Local file does not exist: ```<filename>```                                                           | 1013 |
+| Could not create image resource for resizing                                                    | 1014 |
+| Unsupported label: ```<label>```                                                                      | 1015 |
+| FFprobe failed (code ```<error code>```): ```<output>```                                                    | 1016 |
+| Failed to parse ffprobe JSON: ```<output>```                                                          | 1017 |
+| Unable to determine video duration.                                                             | 1018 |
+| FFmpeg not found in the local directory or globally.                                            | 1019 |
+| FFmpeg failed (code ```<error code>```): ```<output>```                                                     | 1020 |
+| Output file missing or empty. FFmpeg output: ```<output>```                                           | 1021 |
+| FFprobe not found in the local directory or globally.                                           | 1022 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -289,8 +316,9 @@ Thanks to the follow who have provided techincal and/or financial support for th
 * [Ludwig Noujarret](https://bsky.app/profile/ludwig.noujarret.com)
 * [Paul Lee](https://bsky.app/profile/drpaullee.bsky.social)
 * [AJ](https://bsky.app/profile/asjmcguire.bsky.social)
-* [https://bsky.app/profile/bobafettfanclub.com](https://bsky.app/profile/bobafettfanclub.com)
+* [Boba Fett Fan Club](https://bsky.app/profile/bobafettfanclub.com)
 * [Doug "Bear" Hazard](https://bsky.app/profile/bearlydoug.com)
+* [Muzikals](https://bsky.app/profile/muzikals.eurosky.social)
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 

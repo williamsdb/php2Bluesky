@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.10] - 2025-04-10
+
+### Update
+
+- change the video upload limit to three minutes
+
 ## [2.3.9] - 2025-04-09
 
 ### Update

@@ -9,7 +9,7 @@ class BlueskyConsts
     const MAX_IMAGE_UPLOAD = 4;
     const MAX_VIDEO_UPLOAD_SIZE = 50000000;
     const MAX_VIDEO_UPLOAD = 1;
-    const MAX_VIDEO_DURATION = 60; // in seconds
+    const MAX_VIDEO_DURATION = 180; // in seconds
     const MIN_POST_SIZE = 3;
     const MAX_POST_SIZE = 300;
     const FILE_TYPES = [

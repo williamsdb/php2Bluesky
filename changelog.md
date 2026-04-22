@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.11] - 2025-04-11
+
+### Added
+
+- ability to restrict who can respond to a post
+
 ## [2.3.10] - 2025-04-10
 
 ### Update

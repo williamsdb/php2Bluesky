@@ -406,6 +406,41 @@ class php2Bluesky
         return $connection->request('POST', 'com.atproto.repo.createRecord', $args);
     }
 
+    // add a restriction to a post (e.g. only allow followers to reply)
+    public function add_restrictions($connection, $response, $allowList)
+    {
+
+        $allowArray = [];
+
+        // check the allow list
+        $singleAllows = is_array($allowList) ? $allowList : [$allowList];
+        foreach ($singleAllows as $allow) {
+            if (!in_array(strtolower($allow), array_map('strtolower', BlueskyConsts::ALLOWED_THREADGATES), true)) {
+                throw new php2BlueskyException("Unsupported threadgate: '$allow'", 1023);
+            }
+            $allowArray[] = ['$type' => 'app.bsky.feed.threadgate#' . strtolower($allow) . 'Rule'];
+        }
+
+        // extract the post id
+        $parts = explode('/', $response->uri);
+        $rkey = end($parts);
+
+        // try adding a restriction
+        $args = [
+            'repo' => $connection->getAccountDid(),
+            'collection' => 'app.bsky.feed.threadgate',
+            'rkey' => $rkey,
+            'record' => [
+                '$type' => 'app.bsky.feed.threadgate',
+                'post' => $response->uri,
+                'createdAt' => date('c'),
+                'allow' => $allowArray
+            ]
+        ];
+
+        return $connection->request('POST', 'com.atproto.repo.createRecord', $args);
+    }
+
     // take a response from post_to_bluesky and return a permalink
     public function permalink_from_response($response, $handle)
     {

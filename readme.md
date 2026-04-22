@@ -266,6 +266,52 @@ $response = $php2Bluesky->post_to_bluesky(connection: $connection,
 
 ````
 
+### Getting current rate limits
+
+Once you have a connection created, you can find out what your rate limit is, how many messages you can send, and when the rate limit resets. Use this to ensure that your messages don't get rejected.
+
+````php
+$rates = $php2Bluesky->get_rate_limits($connection);
+print_r($rates);
+````
+
+The above returns an array as follows:
+
+````
+Array
+(
+    [Limit] => 10
+    [Remaining] => 9
+    [Reset] => 1776977065
+    [Reset_Human] => 2026-04-23 20:44:25
+)
+````
+
+### Setting who can reply to a post 
+##### v2.3.11 and above
+
+With this call, you are able to set who is able to reply to a post. Unlike the other calls, you can ONLY do this after posting. 
+
+````php
+$text = "This is some text to which only @spokenlikeageek.com can reply.";
+
+$response = $php2Bluesky->post_to_bluesky($connection, $text);
+
+$php2Bluesky->add_restrictions($connection, $response, 'Mention');
+
+````
+
+You can send up to five allow values as an array, i.e ```['mention', 'follower']```
+
+
+| Allow Value         | Explanation                      |
+|---------------------|----------------------------------|
+| mention             | Anyone mentioned in the post     |
+| following           | Anyone you are following         |
+| follower            | Anyone who is a follower         |
+| list                | Anyone in this list...<br>NOT CURRENTLY SUPPORTED        |
+| []                  | Empty array - nobody can reply   |
+
 ### Error Codes
 
 List of error codes and messages that are thrown by php2Bluesky.
@@ -293,6 +339,7 @@ List of error codes and messages that are thrown by php2Bluesky.
 | FFmpeg failed (code ```<error code>```): ```<output>```                                                     | 1020 |
 | Output file missing or empty. FFmpeg output: ```<output>```                                           | 1021 |
 | FFprobe not found in the local directory or globally.                                           | 1022 |
+| Unsupported Threadgate: ```<allow>```                                           | 1023 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

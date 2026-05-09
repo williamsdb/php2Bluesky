@@ -1,6 +1,5 @@
 <a name="readme-top"></a>
 
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -12,8 +11,6 @@
     <br />
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -41,40 +38,35 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 With all the uncertainty surrounding the future of X (née Twitter), I decided to take a look at Bluesky, which somewhat ironically has its roots in Twitter, where it was started as an internal project. I worry about Bluesky's long-term, given that ultimately it too has to make money, something that Twitter has singularly failed to do. None of this, of course, affects the topic today, which is posting to Bluesky via the API.
 
 I needed a way to post to Bluesky from PHP and so I searched for a library to help and when I couldn't find one I wrote this.
 
-
 <a href='https://ko-fi.com/Y8Y0POEES' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 ### Built With
 
-* [PHP](https://php.net)
-* [BlueskyApi by Clark Rasmussen](https://github.com/cjrasmussen/BlueskyApi)
+- [PHP](https://php.net)
+- [BlueskyApi by Clark Rasmussen](https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
-***NOTE:*** This is for v2 of php2Bluesky. If you are looking for the v1 details you can find that [here](https://github.com/williamsdb/php2Bluesky/blob/8b137617bda0bd9dd97462966a8d9404e08ea807/readme.md). 
+**_NOTE:_** This is for v2 of php2Bluesky. If you are looking for the v1 details you can find that [here](https://github.com/williamsdb/php2Bluesky/blob/8b137617bda0bd9dd97462966a8d9404e08ea807/readme.md).
 
 Running the script is very straightforward:
 
 1. install [composer](https://getcomposer.org/)
-2. add the BlueskyAPI 
+2. add the BlueskyAPI
 
 > composer.phar require cjrasmussen/bluesky-api
 
@@ -82,7 +74,7 @@ Running the script is very straightforward:
 
 > composer.phar require williamsdb/php2bluesky
 
-Now you can inspect [example.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/example.php) to get some examples and/or see below. 
+Now you can inspect [example.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/example.php) to get some examples and/or see below.
 
 If you are interested in what is happening under the hood then read [this series of blog posts](https://www.spokenlikeageek.com/tag/bluesky/).
 
@@ -91,10 +83,10 @@ If you are interested in what is happening under the hood then read [this series
 Requirements are very simple, it requires the following:
 
 1. PHP (I tested on v8.1.13) - requires php-dom and php-gd
-2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above) 
-2. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
-3. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos or gifs (optional)
-3. [ffmpeg](https://ffmpeg.org/ffmpeg.html) if you intend to upload videos or gifs (optional).
+2. Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) (requires v2 or above)
+3. a Bluesky account and an Application Password (see [this blog post](https://www.spokenlikeageek.com/2023/11/06/posting-to-bluesky-via-the-api-from-php-part-one/) for details of how to do that)
+4. [ffprobe](https://ffmpeg.org/ffprobe.html) if you intend to upload videos or gifs (optional)
+5. [ffmpeg](https://ffmpeg.org/ffmpeg.html) if you intend to upload videos or gifs (optional).
 
 Read more about the [requirements for video upload here](https://www.spokenlikeageek.com/2025/05/10/uploading-videos-with-php2bluesky/).
 
@@ -104,16 +96,15 @@ Read more about the [requirements for video upload here](https://www.spokenlikea
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
-Here's a few examples to get you started. 
+Here's a few examples to get you started.
 
 Note: connection to the Bluesky API is made via Clark Rasmussen's [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi) which this makes a connection to Bluesky and manages tokens etc. See [here](https://github.com/cjrasmussen/BlueskyApi) for more details.
 
-###  Setup and connect to Bluesky
+### Setup and connect to Bluesky
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
@@ -124,7 +115,7 @@ $php2Bluesky = new php2Bluesky();
 
 $handle = 'yourhandle.bsky.social';
 $password = 'abcd-efgh-ijkl-mnop';
-    
+
 // connect to Bluesky API
 $connection = $php2Bluesky->bluesky_connect($handle, $password);
 ```
@@ -133,23 +124,25 @@ $connection = $php2Bluesky->bluesky_connect($handle, $password);
 
 When you instantiate php2Bluesky a number of defaults are set as shown in the table below. However, you can override these as follows:
 
-````php
-$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM', 
-                               $failOverMaxPostSize = FALSE, 
+```php
+$php2Bluesky = new php2Bluesky($linkCardFallback = 'RANDOM',
+                               $failOverMaxPostSize = FALSE,
                                $randomImageURL = 'https://picsum.photos/1024/536',
                                $fileUploadDir='/tmp',
-                               $defaultLang = ['fr']);
-````
+                               $defaultLang = ['fr'],
+                               $autoRotate = false);
+```
 
 See details below on how to set these.
 
-| Name                | Default values                   | Explanation                      |
-|---------------------|----------------------------------|----------------------------------|
-| $linkCardFallback   | 'BLANK'                          | What should happen if a linkcard doesn't have any associated image.<br> <br>Possibe values:<br> <br>RANDOM - a random image taken from $randomImageURL<br>BLANK - a blank image<br>ERROR - throw an error<br>URL - the image at this location, URL=https://...   |
-| $failOverMaxPostSize| FALSE                            | Throw an error if the text is longer than the allowed length of a post. |
-| $randomImageURL     | 'https://picsum.photos/1024/536' | Where to source the random image. Use with $linkCardFallback above.       |
-| $fileUploadDir      | '/tmp'                           | Where to upload images to before posting them. Make sure that the process has permissions to write here.       |
-| $defaultLang        | ['en']                           | The default languages of posts. This must be specified as an array.      |
+| Name                 | Default values                   | Explanation                                                                                                                                                                                                                                                    |
+| -------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| $linkCardFallback    | 'BLANK'                          | What should happen if a linkcard doesn't have any associated image.<br> <br>Possibe values:<br> <br>RANDOM - a random image taken from $randomImageURL<br>BLANK - a blank image<br>ERROR - throw an error<br>URL - the image at this location, URL=https://... |
+| $failOverMaxPostSize | FALSE                            | Throw an error if the text is longer than the allowed length of a post.                                                                                                                                                                                        |
+| $randomImageURL      | 'https://picsum.photos/1024/536' | Where to source the random image. Use with $linkCardFallback above.                                                                                                                                                                                            |
+| $fileUploadDir       | '/tmp'                           | Where to upload images to before posting them. Make sure that the process has permissions to write here.                                                                                                                                                       |
+| $defaultLang         | ['en']                           | The default languages of posts. This must be specified as an array.                                                                                                                                                                                            |
+| $autoRotate          | true                             | A boolean indicating whether images should be auto rotated based on their EXIF data.                                                                                                                                                                           |
 
 ### Sending text with tags
 
@@ -160,7 +153,7 @@ $response = $php2Bluesky->post_to_bluesky($connection, $text);
 print_r($response);
 if (!isset($response->error)){
     $url = $php2Bluesky->permalink_from_response($response, $handle);
-    echo $url.PHP_EOL;            
+    echo $url.PHP_EOL;
 }
 ```
 
@@ -175,30 +168,30 @@ $response = $php2Bluesky->post_to_bluesky($connection, $text, $filename1, '', $a
 print_r($response);
 if (!isset($response->error)){
     $url = $php2Bluesky->permalink_from_response($response, $handle);
-    echo $url.PHP_EOL;            
+    echo $url.PHP_EOL;
 }
 ```
 
 ### Uploading a post with multiple images (both local and remote)
 
-````php
+```php
 $filename1 = 'https://upload.wikimedia.org/wikipedia/en/6/67/Bluesky_User_Profile.png';
 $filename2 = '/Users/neilthompson/Development/php2Bluesky/Screenshot1.png';
 $filename3 = 'https://www.spokenlikeageek.com/wp-content/uploads/2024/11/2024-11-18-19-28-59.png';
 $filename4 = '/Users/neilthompson/Development/php2Bluesky/Screenshot2.png';
 $text = 'An example of four images taken both from a local machine and remote locations with some alt tags';
-    
+
 // send multiple images with text
-$imageArray = array($filename1, $filename2, $filename3, $filename4); 
+$imageArray = array($filename1, $filename2, $filename3, $filename4);
 $alt = array('this has an alt', 'so does this');
-    
+
 $response = $php2Bluesky->post_to_bluesky($connection, $text, $imageArray, '', $alt);
 print_r($response);
 if (!isset($response->error)){
     $url = $php2Bluesky->permalink_from_response($response, $handle);
-    echo $url.PHP_EOL;            
+    echo $url.PHP_EOL;
 }
-```` 
+```
 
 ### Uploading a post with a single video
 
@@ -210,7 +203,7 @@ $response = $php2Bluesky->post_to_bluesky($connection, $text, $filename1);
 print_r($response);
 if (!isset($response->error)){
     $url = $php2Bluesky->permalink_from_response($response, $handle);
-    echo $url.PHP_EOL;            
+    echo $url.PHP_EOL;
 }
 ```
 
@@ -218,66 +211,64 @@ if (!isset($response->error)){
 
 Bluesky allows certain lables to be applied to posts to indicate whether they include any graphic content. There is a table below of what labels are supported but also see [BlueskyConsts.php](https://github.com/williamsdb/php2Bluesky/blob/main/src/BlueskyConsts.php) for the latest.
 
-````php
-$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
-                                          text: $text = "this is the text of your post", 
-                                          media: $media = "https://www.spokenlikeageek.com/wp-content/uploads/2025/06/SCR-20250628-jzfa.png", 
-                                          link: $link = '', 
+```php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection,
+                                          text: $text = "this is the text of your post",
+                                          media: $media = "https://www.spokenlikeageek.com/wp-content/uploads/2025/06/SCR-20250628-jzfa.png",
+                                          link: $link = '',
                                           alt: $alt = "Image of labels applied to a Bluesky post",
                                           labels: $labels = ["!no-unauthenticated", "porn", "sexual"]);
 
-````
+```
 
-
-| Label Value         | UI Label      | Explanation                      |
-|---------------------|---------------|----------------------------------|
-| porn                | Adult         | Explicit/erotic sexual content   |
-| sexual              | Suggestive    | Mild or suggestive sexual themes |
-| nudity              | Nudity        | Non‑erotic or artistic nudity    |
-| graphic-media       | Graphic Media | Violent or graphic content       |
-| !no-unauthenticated | n/a           | makes the content inaccessible to logged-out users in applications which respect the label.      |
-
+| Label Value         | UI Label      | Explanation                                                                                 |
+| ------------------- | ------------- | ------------------------------------------------------------------------------------------- |
+| porn                | Adult         | Explicit/erotic sexual content                                                              |
+| sexual              | Suggestive    | Mild or suggestive sexual themes                                                            |
+| nudity              | Nudity        | Non‑erotic or artistic nudity                                                               |
+| graphic-media       | Graphic Media | Violent or graphic content                                                                  |
+| !no-unauthenticated | n/a           | makes the content inaccessible to logged-out users in applications which respect the label. |
 
 ### Setting the language
 
 By default the language of your posts is set to English but you can override this in one of two ways. Either specify the langauge when creating the instance of php2Bluesky (see above) or pass it when posting. It must be an array even if you are passing a single language.
 
-````php
-$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
-                                          text: $text = "Bonjour le monde!", 
-                                          media: $media = "", 
-                                          link: $link = "", 
+```php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection,
+                                          text: $text = "Bonjour le monde!",
+                                          media: $media = "",
+                                          link: $link = "",
                                           alt: $alt = "",
                                           labels: $labels = "",
                                           lang: $lang = ["fr"]);
 
-````
+```
 
 It is also possible to pass multiple languages as follows:
 
-````php
-$response = $php2Bluesky->post_to_bluesky(connection: $connection, 
-                                          text: $text = "Bonjour le monde!".PHP_EOL."Hello World!", 
-                                          media: $media = "", 
-                                          link: $link = "", 
+```php
+$response = $php2Bluesky->post_to_bluesky(connection: $connection,
+                                          text: $text = "Bonjour le monde!".PHP_EOL."Hello World!",
+                                          media: $media = "",
+                                          link: $link = "",
                                           alt: $alt = "",
                                           labels: $labels = ""
                                           lang: $lang = ["fr", "en-GB"]);
 
-````
+```
 
 ### Getting current rate limits
 
 Once you have a connection created, you can find out what your rate limit is, how many messages you can send, and when the rate limit resets. Use this to ensure that your messages don't get rejected.
 
-````php
+```php
 $rates = $php2Bluesky->get_rate_limits($connection);
 print_r($rates);
-````
+```
 
 The above returns an array as follows:
 
-````
+```
 Array
 (
     [Limit] => 10
@@ -285,87 +276,85 @@ Array
     [Reset] => 1776977065
     [Reset_Human] => 2026-04-23 20:44:25
 )
-````
+```
 
-### Setting who can reply to a post 
+### Setting who can reply to a post
+
 ##### v2.3.11 and above
 
-With this call, you are able to set who is able to reply to a post. Unlike the other calls, you can ONLY do this after posting. 
+With this call, you are able to set who is able to reply to a post. Unlike the other calls, you can ONLY do this after posting.
 
-````php
+```php
 $text = "This is some text to which only @spokenlikeageek.com can reply.";
 
 $response = $php2Bluesky->post_to_bluesky($connection, $text);
 
 $php2Bluesky->add_restrictions($connection, $response, 'Mention');
 
-````
+```
 
-You can send up to five allow values as an array, i.e ```['mention', 'follower']```
+You can send up to five allow values as an array, i.e `['mention', 'follower']`
 
-
-| Allow Value         | Explanation                      |
-|---------------------|----------------------------------|
-| mention             | Anyone mentioned in the post     |
-| following           | Anyone you are following         |
-| follower            | Anyone who is a follower         |
-| list                | Anyone in this list...<br>NOT CURRENTLY SUPPORTED        |
-| []                  | Empty array - nobody can reply   |
+| Allow Value | Explanation                                       |
+| ----------- | ------------------------------------------------- |
+| mention     | Anyone mentioned in the post                      |
+| following   | Anyone you are following                          |
+| follower    | Anyone who is a follower                          |
+| list        | Anyone in this list...<br>NOT CURRENTLY SUPPORTED |
+| []          | Empty array - nobody can reply                    |
 
 ### Error Codes
 
 List of error codes and messages that are thrown by php2Bluesky.
 
-| Message                                                                                         | Code |
-|-------------------------------------------------------------------------------------------------|------|
-| BLANK specified for fallback image but blank.png is missing.                                    | 1001 |
-| Could not determine mime type of file.                                                          | 1002 |
-| File type not supported: ```<mime type>```                                                  | 1003 |
-| Could not get the size of the image.                                                            | 1004 |
-| Provided text greater than ```<BlueskyConsts::MAX_POST_SIZE>```                                      | 1005 |
-| Error loading url: ```<url>```                                                                        | 1006 |
-| No suitable image found for link card.                                                          | 1007 |
-| Video duration exceeds maximum allowed duration of ```<BlueskyConsts::MAX_VIDEO_DURATION>``` seconds. | 1009 |
-| Failed to fetch remote file: ```<error>``` - ```<url>```                                                    | 1010 |
-| No post id found.                                                                               | 1011 |
-| UNUSED                                                                                          | 1012 |
-| Local file does not exist: ```<filename>```                                                           | 1013 |
-| Could not create image resource for resizing                                                    | 1014 |
-| Unsupported label: ```<label>```                                                                      | 1015 |
-| FFprobe failed (code ```<error code>```): ```<output>```                                                    | 1016 |
-| Failed to parse ffprobe JSON: ```<output>```                                                          | 1017 |
-| Unable to determine video duration.                                                             | 1018 |
-| FFmpeg not found in the local directory or globally.                                            | 1019 |
-| FFmpeg failed (code ```<error code>```): ```<output>```                                                     | 1020 |
-| Output file missing or empty. FFmpeg output: ```<output>```                                           | 1021 |
-| FFprobe not found in the local directory or globally.                                           | 1022 |
-| Unsupported Threadgate: ```<allow>```                                           | 1023 |
+| Message                                                                                           | Code |
+| ------------------------------------------------------------------------------------------------- | ---- |
+| BLANK specified for fallback image but blank.png is missing.                                      | 1001 |
+| Could not determine mime type of file.                                                            | 1002 |
+| File type not supported: `<mime type>`                                                            | 1003 |
+| Could not get the size of the image.                                                              | 1004 |
+| Provided text greater than `<BlueskyConsts::MAX_POST_SIZE>`                                       | 1005 |
+| Error loading url: `<url>`                                                                        | 1006 |
+| No suitable image found for link card.                                                            | 1007 |
+| Video duration exceeds maximum allowed duration of `<BlueskyConsts::MAX_VIDEO_DURATION>` seconds. | 1009 |
+| Failed to fetch remote file: `<error>` - `<url>`                                                  | 1010 |
+| No post id found.                                                                                 | 1011 |
+| UNUSED                                                                                            | 1012 |
+| Local file does not exist: `<filename>`                                                           | 1013 |
+| Could not create image resource for resizing                                                      | 1014 |
+| Unsupported label: `<label>`                                                                      | 1015 |
+| FFprobe failed (code `<error code>`): `<output>`                                                  | 1016 |
+| Failed to parse ffprobe JSON: `<output>`                                                          | 1017 |
+| Unable to determine video duration.                                                               | 1018 |
+| FFmpeg not found in the local directory or globally.                                              | 1019 |
+| FFmpeg failed (code `<error code>`): `<output>`                                                   | 1020 |
+| Output file missing or empty. FFmpeg output: `<output>`                                           | 1021 |
+| FFprobe not found in the local directory or globally.                                             | 1022 |
+| Unsupported Threadgate: `<allow>`                                                                 | 1023 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- ROADMAP -->
+
 ## Known Issues
 
 See the [open issues](https://github.com/williamsdb/php2Bluesky/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Thanks to the follow who have provided techincal and/or financial support for the project:
 
-* [Jan Strohschein](https://bsky.app/profile/hayglow.bsky.social)
-* [Ludwig Noujarret](https://bsky.app/profile/ludwig.noujarret.com)
-* [Paul Lee](https://bsky.app/profile/drpaullee.bsky.social)
-* [AJ](https://bsky.app/profile/asjmcguire.bsky.social)
-* [Boba Fett Fan Club](https://bsky.app/profile/bobafettfanclub.com)
-* [Doug "Bear" Hazard](https://bsky.app/profile/bearlydoug.com)
-* [Muzikals](https://bsky.app/profile/muzikals.eurosky.social)
+- [Jan Strohschein](https://bsky.app/profile/hayglow.bsky.social)
+- [Ludwig Noujarret](https://bsky.app/profile/ludwig.noujarret.com)
+- [Paul Lee](https://bsky.app/profile/drpaullee.bsky.social)
+- [AJ](https://bsky.app/profile/asjmcguire.bsky.social)
+- [Boba Fett Fan Club](https://bsky.app/profile/bobafettfanclub.com)
+- [Doug "Bear" Hazard](https://bsky.app/profile/bearlydoug.com)
+- [Muzikals](https://bsky.app/profile/muzikals.eurosky.social)
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -380,25 +369,23 @@ Don't forget to give the project a star! Thanks again!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the GNU General Public License v3.0. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- CONTACT -->
+
 ## Contact
 
 Bluesky - [@spokenlikeageek.com](https://bsky.app/profile/spokenlikeageek.com)
 
 Mastodon - [@spokenlikeageek](https://techhub.social/@spokenlikeageek)
 
-X - [@spokenlikeageek](https://x.com/spokenlikeageek) 
+X - [@spokenlikeageek](https://x.com/spokenlikeageek)
 
 Website - [https://spokenlikeageek.com](https://www.spokenlikeageek.com/tag/bluesky/)
 
@@ -406,14 +393,13 @@ Project link - [Github](https://github.com/williamsdb/php2Bluesky)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
 
-* [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi)
+- [BlueskyApi](https://github.com/cjrasmussen/BlueskyApi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 [![](https://github.com/williamsdb/php2Bluesky/graphs/contributors)](https://img.shields.io/github/contributors/williamsdb/php2Bluesky.svg?style=for-the-badge)
 
@@ -421,8 +407,10 @@ Project link - [Github](https://github.com/williamsdb/php2Bluesky)
 ![](https://img.shields.io/github/forks/williamsdb/php2Bluesky.svg?style=for-the-badge)
 ![](https://img.shields.io/github/stars/williamsdb/php2Bluesky.svg?style=for-the-badge)
 ![](https://img.shields.io/github/issues/williamsdb/php2Bluesky.svg?style=for-the-badge)
+
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/williamsdb/php2Bluesky.svg?style=for-the-badge
 [contributors-url]: https://github.com/williamsdb/php2Bluesky/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/williamsdb/php2Bluesky.svg?style=for-the-badge
@@ -451,4 +439,4 @@ Project link - [Github](https://github.com/williamsdb/php2Bluesky)
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+[JQuery-url]: https://jquery.com

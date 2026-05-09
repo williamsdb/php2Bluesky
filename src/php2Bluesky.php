@@ -38,13 +38,17 @@ class php2Bluesky
     // default language for posts
     private array $defaultLang;
 
-    public function __construct($linkCardFallback = 'BLANK', $failOverMaxPostSize = FALSE, $randomImageURL = 'https://picsum.photos/1024/536', $fileUploadDir = '/tmp', $defaultLang = ['en'])
+    // whether to auto rotate images
+    private bool $autoRotate;
+
+    public function __construct($linkCardFallback = 'BLANK', $failOverMaxPostSize = FALSE, $randomImageURL = 'https://picsum.photos/1024/536', $fileUploadDir = '/tmp', $defaultLang = ['en'], $autoRotate = TRUE)
     {
         $this->linkCardFallback = $linkCardFallback;
         $this->failOverMaxPostSize = $failOverMaxPostSize;
         $this->randomImageURL = $randomImageURL;
         $this->fileUploadDir = $fileUploadDir;
         $this->defaultLang = $defaultLang;
+        $this->autoRotate = $autoRotate;
     }
 
     public function bluesky_connect($handle, $password)
@@ -130,6 +134,12 @@ class php2Bluesky
 
         // is the file image or video?
         if (strpos($mime, 'image') !== false && $mime != "image/gif") {
+
+            // does the image need auto rotating?
+            if ($this->autoRotate) {
+                $body = $this->rotateImageByExif($body, $filename);
+            }
+
             // does the file size need reducing? (applies to local + remote)
             if ($size > BlueskyConsts::MAX_IMAGE_UPLOAD_SIZE) {
                 $newImage = imagecreatefromstring($body);
@@ -769,6 +779,41 @@ class php2Bluesky
             // If the path is a local path, use basename to get the filename
             return basename($path);
         }
+    }
+
+    // rotate image based on EXIF orientation
+    private function rotateImageByExif($body, $filename)
+    {
+        $image = imagecreatefromstring($body);
+        if ($image === false) return $body;
+
+        $exif = @exif_read_data($filename);
+        if (empty($exif['Orientation'])) return $body;
+
+        $rotated = false;
+        switch ($exif['Orientation']) {
+            case 3:
+                $image = imagerotate($image, 180, 0);
+                $rotated = true;
+                break;
+            case 6:
+                $image = imagerotate($image, -90, 0);
+                $rotated = true;
+                break;
+            case 8:
+                $image = imagerotate($image, 90, 0);
+                $rotated = true;
+                break;
+        }
+
+        if ($rotated) {
+            ob_start();
+            imagejpeg($image, null, 90);
+            $body = ob_get_clean();
+            unset($image);
+        }
+
+        return $body;
     }
 
     // get the size of a video file

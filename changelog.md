@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.13] - 2025-09-12
+
+### Added
+
+- increased the video upload size to 300mb and length to 10 minutes
+
 ## [2.3.12] - 2025-05-09
 
 ### Added

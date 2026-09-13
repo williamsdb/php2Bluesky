@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.14] - 2025-09-13
+
+### Added
+
+- bumped the photo upload limit from four to ten. Above four the photos will be displayed in the new gallery format
+
 ## [2.3.13] - 2025-09-12
 
 ### Added

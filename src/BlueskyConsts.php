@@ -6,7 +6,7 @@ class BlueskyConsts
 {
     // don't change these unless Bluesky changes the limits
     const MAX_IMAGE_UPLOAD_SIZE = 1000000; // in bytes
-    const MAX_IMAGE_UPLOAD = 4;
+    const MAX_GALLERY_IMAGES = 10;
     const MAX_VIDEO_UPLOAD_SIZE = 300000000; // in bytes
     const MAX_VIDEO_UPLOAD = 1;
     const MAX_VIDEO_DURATION = 600; // in seconds

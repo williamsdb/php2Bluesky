@@ -302,45 +302,71 @@ class php2Bluesky
 
         // add any media - will accept multiple images in an array or a single image/video as a string
         $embed = '';
+
         if (!empty($media)) {
+
             if (is_array($media)) {
+
                 $k = 0;
                 $mediaArray = array();
-                while ($k < count($media) && $k < BlueskyConsts::MAX_IMAGE_UPLOAD) {
+
+                // upload each media item until we reach the maximum allowed for a gallery
+                while ($k < count($media) && $k < BlueskyConsts::MAX_GALLERY_IMAGES) {
+
                     $altText = isset($alt[$k]) ? $alt[$k] : '';
-                    $result = $this->upload_media_to_bluesky($connection, $media[$k], $this->fileUploadDir);
+
+                    $result = $this->upload_media_to_bluesky(
+                        $connection,
+                        $media[$k],
+                        $this->fileUploadDir
+                    );
+
                     $response = $result[0];
                     $imageInfo = $result[1];
 
-                    // can't mix your media types
+                    // Can't mix media types - silently ignore video files
+                    // when processing an array of media.
                     if (strpos($response->mimeType, 'video') !== false) {
-                        // silently ignore video
-                    } else {
-                        array_push($mediaArray, [
-                            'alt' => $altText,
-                            'image' => $response,
-                            'aspectRatio' => [
-                                'width' => $imageInfo[0],
-                                'height' => $imageInfo[1]
-                            ]
-                        ]);
+                        $k++;
+                        continue;
                     }
+
+                    array_push($mediaArray, [
+                        'alt' => $altText,
+                        'image' => $response,
+                        'aspectRatio' => [
+                            'width' => $imageInfo[0],
+                            'height' => $imageInfo[1]
+                        ]
+                    ]);
+
                     $k++;
                 }
 
-                // build the embed array
+                // Gallery items have their own lexicon type.
+                foreach ($mediaArray as &$image) {
+                    $image['$type'] = 'app.bsky.embed.gallery#image';
+                }
+                unset($image);
+
                 $embed = [
                     'embed' => [
-                        '$type' => 'app.bsky.embed.images',
-                        'images' => $mediaArray,
+                        '$type' => 'app.bsky.embed.gallery',
+                        'items' => $mediaArray,
                     ],
                 ];
             } else {
-                $result = $this->upload_media_to_bluesky($connection, $media, $this->fileUploadDir);
+
+                $result = $this->upload_media_to_bluesky(
+                    $connection,
+                    $media,
+                    $this->fileUploadDir
+                );
+
                 $response = $result[0];
                 $imageInfo = $result[1];
 
-                // check if the media is a video or GIF and build the embed array accordingly
+                // Check if the media is a video or GIF and build the embed accordingly.
                 if (strpos($response->mimeType, 'video') !== false) {
 
                     $videoEmbed = [
@@ -348,7 +374,7 @@ class php2Bluesky
                         'video' => $response
                     ];
 
-                    // Add aspect ratio if we have it
+                    // Add aspect ratio if we have it.
                     if (!empty($imageInfo)) {
                         $videoEmbed['aspectRatio'] = [
                             'width'  => $imageInfo[0],
@@ -360,9 +386,10 @@ class php2Bluesky
                         'embed' => $videoEmbed,
                     ];
                 } else {
-                    // has an array been passed?
+
+                    // Has an array been passed for alt text?
                     if (is_array($alt)) {
-                        $alt = isset($alt[0]) ? $alt[0] : '';;
+                        $alt = isset($alt[0]) ? $alt[0] : '';
                     }
 
                     $mediaArray = [
@@ -376,7 +403,7 @@ class php2Bluesky
                         ]
                     ];
 
-                    // build the embed array
+                    // A single image continues to use the standard images embed.
                     $embed = [
                         'embed' => [
                             '$type' => 'app.bsky.embed.images',

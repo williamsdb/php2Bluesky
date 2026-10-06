@@ -1,18 +1,24 @@
 # Changelog
 
-## [2.3.14] - 2025-09-13
+## [2.3.15] - 2026-10-06
+
+### Added
+
+- convert gif to a static image when used as part of a linkcard. Requires ffmpeg/ffprove v9 and above
+
+## [2.3.14] - 2026-09-13
 
 ### Added
 
 - bumped the photo upload limit from four to ten. Above four the photos will be displayed in the new gallery format
 
-## [2.3.13] - 2025-09-12
+## [2.3.13] - 2026-09-12
 
 ### Added
 
 - increased the video upload size to 300mb and length to 10 minutes
 
-## [2.3.12] - 2025-05-09
+## [2.3.12] - 2026-05-09
 
 ### Added
 

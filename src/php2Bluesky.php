@@ -747,6 +747,14 @@ class php2Bluesky
                 if (!parse_url($img_url, PHP_URL_SCHEME)) {
                     $img_url = $url . $img_url;
                 }
+
+                // Check to see if this image is a GIF
+                if (strtolower(pathinfo($img_url, PATHINFO_EXTENSION)) === 'gif') {
+                    // Extract the first frame of the GIF as a static image
+                    $img_url = $this->convertGifToImage($img_url, $this->fileUploadDir);
+                }
+
+                // Upload the image to Bluesky
                 $result = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
                 $image = $result[0];
                 $imageInfo = $result[1];
@@ -773,7 +781,16 @@ class php2Bluesky
                 }
             }
         } else {
-            $result = $this->upload_media_to_bluesky($connection, $card["imageurlff"], $this->fileUploadDir);
+            $img_url = $card["imageurlff"];
+
+            // Check to see if this image is a GIF
+            if (strtolower(pathinfo($img_url, PATHINFO_EXTENSION)) === 'gif') {
+                // Extract the first frame of the GIF as a static image
+                $img_url = $this->convertGifToImage($img_url, $this->fileUploadDir);
+            }
+
+            // Upload the image to Bluesky
+            $result = $this->upload_media_to_bluesky($connection, $img_url, $this->fileUploadDir);
             $image = $result[0];
             $imageInfo = $result[1];
         }
@@ -966,10 +983,13 @@ class php2Bluesky
         $newTempFile = $fileUploadDir . '/' . pathinfo($basename, PATHINFO_FILENAME) . '.mp4';
         //        $cmd = escapeshellcmd($ffmpegPath) . " -i " . escapeshellarg($gifPath) . " -y -movflags +faststart -pix_fmt yuv420p " . escapeshellarg($newTempFile) . " 2>&1";
         $cmd = escapeshellcmd($ffmpegPath) .
-            " -y -i " . escapeshellarg($gifPath) .
-            " -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" " .
-            " -movflags +faststart -pix_fmt yuv420p -vsync 2 " .
-            escapeshellarg($newTempFile) . " 2>&1";
+            " -hide_banner -y" .
+            " -i " . escapeshellarg($gifPath) .
+            " -vf " . escapeshellarg("scale=trunc(iw/2)*2:trunc(ih/2)*2") .
+            " -movflags +faststart" .
+            " -pix_fmt yuv420p" .
+            " " . escapeshellarg($newTempFile) .
+            " 2>&1";
         $output = [];
         $returnCode = 0;
 
@@ -990,6 +1010,69 @@ class php2Bluesky
         }
 
         return $newTempFile;
+    }
+
+
+    // convert a GIF to a image file
+    private function convertGifToImage($gifPath, $fileUploadDir = '/tmp')
+    {
+
+        $ffmpegPath = null;
+
+        // First check local directory
+        if (is_file('./ffmpeg') && is_executable('./ffmpeg')) {
+            $ffmpegPath = './ffmpeg';
+        } else {
+            // Check OS and look for ffmpeg globally
+            if (stripos(PHP_OS, 'WIN') === 0) {
+                $checkCmd = 'where ffmpeg';
+            } else {
+                $checkCmd = 'command -v ffmpeg';
+            }
+
+            $ffmpegGlobal = trim(shell_exec($checkCmd) ?? '');
+
+            if ($ffmpegGlobal) {
+                // On Windows, 'where' can return multiple paths; take the first one
+                $ffmpegPath = strtok($ffmpegGlobal, PHP_EOL);
+            }
+        }
+
+        // If ffmpeg is not found in the local directory or globally, throw an exception
+        if (!$ffmpegPath) {
+            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1019);
+        }
+
+        // convert to image
+        $outputFile = tempnam($fileUploadDir, 'gif_frame_') . '.jpg';
+        $cmd = sprintf(
+            escapeshellarg($ffmpegPath) . ' -hide_banner -y -i %s -frames:v 1 %s 2>&1',
+            escapeshellarg($gifPath),
+            escapeshellarg($outputFile)
+        );
+
+        exec($cmd, $output, $returnCode);
+
+        $output = [];
+        $returnCode = 0;
+
+        exec($cmd, $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            throw new php2BlueskyException(
+                "FFmpeg failed (code $returnCode): " . implode("\n", $output),
+                1020
+            );
+        }
+
+        if (!file_exists($outputFile) || filesize($outputFile) === 0) {
+            throw new php2BlueskyException(
+                "Output file missing or empty. FFmpeg output: " . implode("\n", $output),
+                1021
+            );
+        }
+
+        return $outputFile;
     }
 
     // check if the text is over the max post size

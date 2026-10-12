@@ -60,6 +60,7 @@ class php2Bluesky
 
     private function upload_media_to_bluesky($connection, $filename, $fileUploadDir = '/tmp')
     {
+
         // helper: fetch remote file with cURL
         $fetchRemote = function ($url) {
             $ch = curl_init($url);
@@ -121,6 +122,16 @@ class php2Bluesky
         // truncate mime type at semicolon if present
         if (($pos = strpos($mime, ';')) !== false) {
             $mime = substr($mime, 0, $pos);
+        }
+
+        // fix for Amazon s3 downloads sometimes returning incorrect mime type
+        if ($mime === 'application/octet-stream' && class_exists('finfo')) {
+            $finfo = new \finfo(\FILEINFO_MIME_TYPE);
+            $detectedMime = $finfo->buffer($body);
+
+            if ($detectedMime !== false) {
+                $mime = $detectedMime;
+            }
         }
 
         // what file type have we got?
@@ -950,31 +961,8 @@ class php2Bluesky
     private function convertGifToVideo($gifPath, $fileUploadDir = '/tmp')
     {
 
-        $ffmpegPath = null;
-
-        // First check local directory
-        if (is_file('./ffmpeg') && is_executable('./ffmpeg')) {
-            $ffmpegPath = './ffmpeg';
-        } else {
-            // Check OS and look for ffmpeg globally
-            if (stripos(PHP_OS, 'WIN') === 0) {
-                $checkCmd = 'where ffmpeg';
-            } else {
-                $checkCmd = 'command -v ffmpeg';
-            }
-
-            $ffmpegGlobal = trim(shell_exec($checkCmd) ?? '');
-
-            if ($ffmpegGlobal) {
-                // On Windows, 'where' can return multiple paths; take the first one
-                $ffmpegPath = strtok($ffmpegGlobal, PHP_EOL);
-            }
-        }
-
-        // If ffmpeg is not found in the local directory or globally, throw an exception
-        if (!$ffmpegPath) {
-            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1019);
-        }
+        // get the path to the ffmpeg executable
+        $ffmpegPath = $this->getffmpegPath();
 
         // get the basename of the file
         $basename = $this->getFileName($gifPath);
@@ -1017,31 +1005,8 @@ class php2Bluesky
     private function convertGifToImage($gifPath, $fileUploadDir = '/tmp')
     {
 
-        $ffmpegPath = null;
-
-        // First check local directory
-        if (is_file('./ffmpeg') && is_executable('./ffmpeg')) {
-            $ffmpegPath = './ffmpeg';
-        } else {
-            // Check OS and look for ffmpeg globally
-            if (stripos(PHP_OS, 'WIN') === 0) {
-                $checkCmd = 'where ffmpeg';
-            } else {
-                $checkCmd = 'command -v ffmpeg';
-            }
-
-            $ffmpegGlobal = trim(shell_exec($checkCmd) ?? '');
-
-            if ($ffmpegGlobal) {
-                // On Windows, 'where' can return multiple paths; take the first one
-                $ffmpegPath = strtok($ffmpegGlobal, PHP_EOL);
-            }
-        }
-
-        // If ffmpeg is not found in the local directory or globally, throw an exception
-        if (!$ffmpegPath) {
-            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1019);
-        }
+        // get the path to the ffmpeg executable
+        $ffmpegPath = $this->getffmpegPath();
 
         // convert to image
         $outputFile = tempnam($fileUploadDir, 'gif_frame_') . '.jpg';
@@ -1073,6 +1038,39 @@ class php2Bluesky
         }
 
         return $outputFile;
+    }
+
+    // Get the path to the ffmpeg executable, checking both local and global locations
+    private function getffmpegPath()
+    {
+
+        $ffmpegPath = null;
+
+        // First check local directory
+        if (is_file('./ffmpeg') && is_executable('./ffmpeg')) {
+            $ffmpegPath = './ffmpeg';
+        } else {
+            // Check OS and look for ffmpeg globally
+            if (stripos(PHP_OS, 'WIN') === 0) {
+                $checkCmd = 'where ffmpeg';
+            } else {
+                $checkCmd = 'command -v ffmpeg';
+            }
+
+            $ffmpegGlobal = trim(shell_exec($checkCmd) ?? '');
+
+            if ($ffmpegGlobal) {
+                // On Windows, 'where' can return multiple paths; take the first one
+                $ffmpegPath = strtok($ffmpegGlobal, PHP_EOL);
+            }
+        }
+
+        // If ffmpeg is not found in the local directory or globally, throw an exception
+        if (!$ffmpegPath) {
+            throw new php2BlueskyException("FFmpeg not found in the local directory or globally.", 1019);
+        }
+
+        return $ffmpegPath;
     }
 
     // check if the text is over the max post size

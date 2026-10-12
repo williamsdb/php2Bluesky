@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.16] - 2026-10-12
+
+### Added
+
+- separate out the ffmpeg locate code into a function for reuse
+- handle edge case when s3 gives mime type as application/octet-stream
+
 ## [2.3.15] - 2026-10-06
 
 ### Added

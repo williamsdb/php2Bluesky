@@ -4,5 +4,5 @@ namespace williamsdb\php2bluesky;
 
 class Version
 {
-    const VERSION = '2.3.15';
+    const VERSION = '2.3.16';
 }
